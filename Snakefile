@@ -8,14 +8,6 @@ configfile: "config.yaml"
 # Get sample names from the config file
 SAMPLES = config["samples"]
 
-# Define container images
-FASTQC_CONTAINER = "docker://biocontainers/fastqc:v0.11.9_cv8"
-TRIMGALORE_CONTAINER = "docker://biocontainers/trim-galore:v0.6.6_cv1"
-STAR_CONTAINER = "docker://biocontainers/star:2.7.9a--1"
-SAMTOOLS_CONTAINER = "docker://biocontainers/samtools:v1.15.1_cv1"
-SUBREAD_CONTAINER = "docker://biocontainers/subread:v2.0.3_cv1"
-DESEQ2_CONTAINER = "docker://biocontainers/bioconductor-deseq2:v1.34.0_cv1"
-
 
 # Rule all: defines the final output files of the pipeline
 rule all:
@@ -37,8 +29,6 @@ rule deseq2:
         "results/deseq2/{contrast}.csv"
     log:
         "logs/deseq2/{contrast}.log"
-    container:
-        DESEQ2_CONTAINER
     shell:
         "Rscript {input.script} {input.counts} {input.samples_file} {wildcards.contrast} {output} > {log} 2>&1"
 
@@ -51,8 +41,6 @@ rule featurecounts:
         "results/featurecounts/counts.txt"
     log:
         "logs/featurecounts.log"
-    container:
-        SUBREAD_CONTAINER
     shell:
         "featureCounts -T 4 -a {input.annotation} -o {output} {input.bams} > {log} 2>&1"
 
@@ -64,8 +52,6 @@ rule samtools_index:
         "results/star_aligned/{sample}.bam.bai"
     log:
         "logs/samtools_index/{sample}.log"
-    container:
-        SAMTOOLS_CONTAINER
     shell:
         "samtools index {input} > {log} 2>&1"
 
@@ -78,8 +64,6 @@ rule star_align:
         "results/star_aligned/{sample}.bam"
     log:
         "logs/star_align/{sample}.log"
-    container:
-        STAR_CONTAINER
     shell:
         "STAR --runThreadN 4 --genomeDir {input.index} --readFilesIn {input.fastq} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix results/star_aligned/{wildcards.sample} > {log} 2>&1 && mv results/star_aligned/{wildcards.sample}Aligned.sortedByCoord.out.bam {output}"
 
@@ -92,8 +76,6 @@ rule star_index:
         directory("genome/star_index")
     log:
         "logs/star_index.log"
-    container:
-        STAR_CONTAINER
     shell:
         "STAR --runThreadN 4 --runMode genomeGenerate --genomeDir {output} --genomeFastaFiles {input.genome} --sjdbGTFfile {input.annotation} > {log} 2>&1"
 
@@ -105,8 +87,6 @@ rule trim_galore:
         "results/trimmed_fastq/{sample}_trimmed.fq.gz"
     log:
         "logs/trim_galore/{sample}.log"
-    container:
-        TRIMGALORE_CONTAINER
     shell:
         "trim_galore --fastqc -o results/trimmed_fastq {input} > {log} 2>&1"
 
@@ -118,7 +98,5 @@ rule fastqc_raw:
         "results/fastqc/{sample}_fastqc.html"
     log:
         "logs/fastqc/{sample}.log"
-    container:
-        FASTQC_CONTAINER
     shell:
         "fastqc {input} -o results/fastqc > {log} 2>&1"
