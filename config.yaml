@@ -1,11 +1,57 @@
 samples:
-  - control_1
-  - control_2
-  - treatment_1
-  - treatment_2
+  # Control group (D5 repeats)
+  - D5-5-1
+  - D5-5-2
+  - D5-5-3
+  - D5-6-1
+  - D5-6-2
+  - D5-6-3
+  - D5-7-1
+  - D5-7-2
+  - D5-7-3
+  # Mutant groups
+  - A1
+  - A3
+  - D1
+  - D2
+  - R1
+  - R2
 
-ref_genome: "genome/ref.fa"
-ref_annotation: "genome/ref.gtf"
+# Path to your mounted RDM data
+data_dir: "/Volumes/LEPTORNAI-A10907/LmacRNAseqdata"
+
+ref_genome: "genome/JN3.fasta"
+ref_annotation: "genome/JN3.gff"
 
 contrasts:
-  - "treatment_vs_control"
+  - "A1_vs_D5"
+  - "A3_vs_D5"
+  - "D1_vs_D5"
+  - "D2_vs_D5"
+  - "R1_vs_D5"
+  - "R2_vs_D5"
+
+# Define sample groups (control vs mutant groups)
+sample_groups:
+  control:
+    - D5-5-1
+    - D5-5-2
+    - D5-5-3
+    - D5-6-1
+    - D5-6-2
+    - D5-6-3
+    - D5-7-1
+    - D5-7-2
+    - D5-7-3
+  mutant_A1:
+    - A1
+  mutant_A3:
+    - A3
+  mutant_D1:
+    - D1
+  mutant_D2:
+    - D2
+  mutant_R1:
+    - R1
+  mutant_R2:
+    - R2

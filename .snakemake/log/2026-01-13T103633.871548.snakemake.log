@@ -1,0 +1,32 @@
+Assuming unrestricted shared filesystem usage.
+host: d-i184-8-34.staff.eduroam.uq.edu.au
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Singularity containers: ignored
+Job stats:
+job               count
+--------------  -------
+all                   1
+deseq2                1
+fastqc_raw            4
+featurecounts         1
+samtools_index        4
+star_align            4
+star_index            1
+trim_galore           4
+total                20
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Jan 13 10:36:37 2026]
+localrule star_index:
+    input: genome/ref.fa, genome/ref.gtf
+    output: genome/star_index
+    log: logs/star_index.log
+    jobid: 10
+    reason: Forced execution
+    resources: tmpdir=/var/folders/t9/8q_r635s2lj78bg_1g7j21v00000gn/T
+WorkflowError:
+Error running conda info. Is conda installed and accessible? Error: Command 'conda info --json' returned non-zero exit status 127.
