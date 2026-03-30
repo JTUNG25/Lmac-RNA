@@ -1,57 +1,8 @@
-samples:
-  # Control group (D5 repeats)
-  - D5-5-1
-  - D5-5-2
-  - D5-5-3
-  - D5-6-1
-  - D5-6-2
-  - D5-6-3
-  - D5-7-1
-  - D5-7-2
-  - D5-7-3
-  # Mutant groups
-  - A1
-  - A3
-  - D1
-  - D2
-  - R1
-  - R2
+# Configuration file for RNA-seq alignment workflow
 
-# Path to your mounted RDM data
-data_dir: "/Volumes/LEPTORNAI-A10907/LmacRNAseqdata"
+# Reference genome files
+genome_fasta: "reference/leptosphaeria_maculans_genome.fa"  # Path to reference genome FASTA
+gtf_file: "reference/leptosphaeria_maculans_annotation.gtf"  # Optional: GTF annotation file (comment out if not available)
 
-ref_genome: "genome/JN3.fasta"
-ref_annotation: "genome/JN3.gff"
-
-contrasts:
-  - "A1_vs_D5"
-  - "A3_vs_D5"
-  - "D1_vs_D5"
-  - "D2_vs_D5"
-  - "R1_vs_D5"
-  - "R2_vs_D5"
-
-# Define sample groups (control vs mutant groups)
-sample_groups:
-  control:
-    - D5-5-1
-    - D5-5-2
-    - D5-5-3
-    - D5-6-1
-    - D5-6-2
-    - D5-6-3
-    - D5-7-1
-    - D5-7-2
-    - D5-7-3
-  mutant_A1:
-    - A1
-  mutant_A3:
-    - A3
-  mutant_D1:
-    - D1
-  mutant_D2:
-    - D2
-  mutant_R1:
-    - R1
-  mutant_R2:
-    - R2
+# Parameters
+threads: 8  # Maximum number of threads to use
