@@ -22,8 +22,8 @@ rule target:
         ),
         "results/multiqc/multiqc_report.html",
         # Alignment
-        expand("results/aligned/{sample}.sorted.bam", sample=SAMPLES),
-        expand("results/aligned/{sample}.sorted.bam.bai", sample=SAMPLES),
+        expand("results/hisat2/{sample}.sorted.bam", sample=SAMPLES),
+        expand("results/hisat2/{sample}.sorted.bam.bai", sample=SAMPLES),
         # Alignment statistics
         expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
         "results/stats/alignment_summary.txt",
@@ -31,8 +31,8 @@ rule target:
 
 rule fastqc:
     input:
-        r1="concatenated_fastq /{sample}_R1.fastq.gz",
-        r2="concatenated_fastq /{sample}_R2.fastq.gz",
+        r1="concatenated_fastq/{sample}_R1.fastq.gz",
+        r2="concatenated_fastq/{sample}_R2.fastq.gz",
     output:
         r1_html="results/fastqc/{sample}_R1_fastqc.html",
         r1_zip="results/fastqc/{sample}_R1_fastqc.zip",
@@ -116,12 +116,12 @@ rule build_hisat2_index_with_ss:
 # Align reads with HISAT2
 rule hisat2_align:
     input:
-        r1="concatenated_fastq /{sample}_R1.fastq.gz",
-        r2="concatenated_fastq /{sample}_R2.fastq.gz",
+        r1="concatenated_fastq/{sample}_R1.fastq.gz",
+        r2="concatenated_fastq/{sample}_R2.fastq.gz",
         idx=expand("reference/hisat2_index/genome_ss.{i}.ht2", i=range(1, 9)),
     output:
-        bam="results/aligned/{sample}.bam",
-        summary="results/aligned/{sample}.hisat2_summary.txt",
+        bam="results/hisat2/{sample}.bam",
+        summary="results/hisat2/{sample}.hisat2_summary.txt",
     log:
         "logs/hisat2/{sample}.log",
     container:
@@ -148,10 +148,10 @@ rule hisat2_align:
 # Sort and index BAM files
 rule sort_bam:
     input:
-        "results/aligned/{sample}.bam",
+        "results/hisat2/{sample}.bam",
     output:
-        bam="results/aligned/{sample}.sorted.bam",
-        bai="results/aligned/{sample}.sorted.bam.bai",
+        bam="results/hisat2/{sample}.sorted.bam",
+        bai="results/hisat2/{sample}.sorted.bam.bai",
     log:
         "logs/samtools_sort/{sample}.log",
     container:
@@ -170,7 +170,7 @@ rule sort_bam:
 # Generate alignment statistics
 rule alignment_stats:
     input:
-        "results/aligned/{sample}.sorted.bam",
+        "results/hisat2/{sample}.sorted.bam",
     output:
         stats="results/stats/{sample}.alignment_stats.txt",
         flagstat="results/stats/{sample}.flagstat.txt",
@@ -244,7 +244,7 @@ rule multiqc:
         fastqc=expand(
             "results/fastqc/{sample}_R{read}_fastqc.zip", sample=SAMPLES, read=[1, 2]
         ),
-        hisat2=expand("results/aligned/{sample}.hisat2_summary.txt", sample=SAMPLES),
+        hisat2=expand("results/hisat2/{sample}.hisat2_summary.txt", sample=SAMPLES),
         stats=expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
     output:
         "results/multiqc/multiqc_report.html",
@@ -270,6 +270,6 @@ rule multiqc:
 rule clean:
     shell:
         """
-        rm -f results/aligned/*.bam
+        rm -f results/hisat2/*.bam
         echo "Cleaned unsorted BAM files"
         """

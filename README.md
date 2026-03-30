@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # RNA-seq Alignment Workflow for Leptosphaeria maculans (Bunya HPC)
 
 This Snakemake workflow performs quality control and alignment of paired-end RNA-seq reads using HISAT2 on the Bunya HPC cluster using containers.
@@ -181,3 +182,7 @@ scp -r USERNAME@bunya.rcc.uq.edu.au:/QRISdata/Q9140/lmac/lmac_rnaseq/results/ ./
 - Uses Apptainer containers with GPU support enabled
 - Temporary files stored in `$HOME/tmp`
 
+=======
+# Lmac-RNA
+Transcriptome analasis
+>>>>>>> ecd37a6f4db7277780324cd06a9182d5d535b276
