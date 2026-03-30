@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 # Container definitions
-fastqc_container = "docker://quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
-multiqc_container = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
-hisat2_container = "docker://quay.io/biocontainers/hisat2:2.2.1--h1b792b2_3"
-samtools_container = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
+fastqc = "docker://quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
+multiqc = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
+hisat2 = "docker://quay.io/biocontainers/hisat2:2.2.1--h1b792b2_3"
+samtools = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
 
 GENOME = "data/genome/JN3.fasta"
 GTF = "data/genome/JN3.gtf"
@@ -16,15 +16,11 @@ SAMPLES = all_samples
 
 rule target:
     input:
-        # Quality control
         expand(
             "results/fastqc/{sample}_R{read}_fastqc.html", sample=SAMPLES, read=[1, 2]
         ),
-        "results/multiqc/multiqc_report.html",
-        # Alignment
         expand("results/hisat2/{sample}.sorted.bam", sample=SAMPLES),
         expand("results/hisat2/{sample}.sorted.bam.bai", sample=SAMPLES),
-        # Alignment statistics
         expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
         "results/stats/alignment_summary.txt",
 
@@ -41,7 +37,7 @@ rule fastqc:
     log:
         "logs/fastqc/{sample}.log",
     container:
-        fastqc_container
+        fastqc
     threads: 4
     resources:
         mem_mb=16000,
@@ -54,7 +50,7 @@ rule fastqc:
         fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2}
         """
 
-# Optional: Build HISAT2 index with splice sites (if GTF available)
+
 rule build_hisat2_index_with_ss:
     input:
         genome=GENOME,
@@ -66,7 +62,7 @@ rule build_hisat2_index_with_ss:
     log:
         "logs/hisat2_index/build_index_ss.log",
     container:
-        hisat2_container
+        hisat2
     threads: 8
     resources:
         mem_mb=32000,
@@ -100,7 +96,7 @@ rule hisat2_align:
     log:
         "logs/hisat2/{sample}.log",
     container:
-        hisat2_container
+        hisat2
     threads: 8
     resources:
         mem_mb=32000,
@@ -128,7 +124,7 @@ rule sam_to_bam:
     log:
         "logs/sam_to_bam/{sample}.log",
     container:
-        samtools_container
+        samtools
     threads: 2
     resources:
         mem_mb=16000,
@@ -146,11 +142,11 @@ rule sort_bam:
     log:
         "logs/samtools_sort/{sample}.log",
     container:
-        samtools_container
+        samtools
     threads: 4
     resources:
-        mem_mb=8000,
-        runtime=60,
+        mem_mb=16000,
+        runtime=120,
     shell:
         """
         samtools sort -@ {threads} -o {output.bam} {input}
@@ -169,7 +165,7 @@ rule alignment_stats:
     log:
         "logs/samtools_stats/{sample}.log",
     container:
-        samtools_container
+        samtools
     threads: 2
     resources:
         mem_mb=4000,
@@ -227,34 +223,6 @@ rule aggregate_stats:
                 out.write(
                     f"{sample}\t{total_reads}\t{mapped_reads}\t{mapping_rate}%\t{properly_paired}%\n"
                 )
-
-
-# MultiQC report
-rule multiqc:
-    input:
-        fastqc=expand(
-            "results/fastqc/{sample}_R{read}_fastqc.zip", sample=SAMPLES, read=[1, 2]
-        ),
-        hisat2=expand("results/hisat2/{sample}.hisat2_summary.txt", sample=SAMPLES),
-        stats=expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
-    output:
-        "results/multiqc/multiqc_report.html",
-    log:
-        "logs/multiqc/multiqc.log",
-    container:
-        multiqc_container
-    threads: 2
-    resources:
-        mem_mb=4000,
-        runtime=30,
-    params:
-        outdir="results/multiqc",
-        indir="results",
-    shell:
-        """
-        mkdir -p {params.outdir}
-        multiqc -o {params.outdir} {params.indir}
-        """
 
 
 # Clean up intermediate files
