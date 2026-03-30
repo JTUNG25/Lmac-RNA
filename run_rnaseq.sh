@@ -5,7 +5,7 @@
 #SBATCH --mem=8GB
 #SBATCH --time=24:00:00
 #SBATCH --job-name=rnaseq_hisat2
-#SBATCH --output=snakemake_main.log
+#SBATCH --output=sm.log
 
 source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/conda.sh
 conda activate snakemake8
@@ -20,4 +20,4 @@ mkdir -p $TMPDIR
 chmod +x profiles/bunya/status-sacct-robust.sh
 
 # Run snakemake
-snakemake -s rnaseq_hisat2.smk --profile profiles/bunya/ --skip-script-cleanup
+snakemake -s rnaseq_hisat2.smk --profile profiles/bunya/ 
