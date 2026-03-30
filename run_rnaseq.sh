@@ -11,7 +11,7 @@ source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/co
 conda activate snakemake8
 
 # Set working directory (change this to your project directory)
-cd /QRISdata/Q9140/lmac_rnaseq
+cd /QRISdata/Q9141/lmac_rna
 
 export TMPDIR=$HOME/tmp
 mkdir -p $TMPDIR
