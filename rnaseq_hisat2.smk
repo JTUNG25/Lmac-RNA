@@ -54,30 +54,6 @@ rule fastqc:
         fastqc -o {params.outdir} -t {threads} {input.r1} {input.r2}
         """
 
-
-# Build HISAT2 index (if not provided)
-rule build_hisat2_index:
-    input:
-        genome=GENOME,
-    output:
-        expand("reference/hisat2_index/genome.{i}.ht2", i=range(1, 9)),
-    log:
-        "logs/hisat2_index/build_index.log",
-    container:
-        hisat2_container
-    threads: 8
-    resources:
-        mem_mb=32000,
-        runtime=120,
-    params:
-        prefix="reference/hisat2_index/genome",
-    shell:
-        """
-        mkdir -p reference/hisat2_index
-        hisat2-build -p {threads} {input.genome} {params.prefix}
-        """
-
-
 # Optional: Build HISAT2 index with splice sites (if GTF available)
 rule build_hisat2_index_with_ss:
     input:
@@ -113,14 +89,13 @@ rule build_hisat2_index_with_ss:
         """
 
 
-# Align reads with HISAT2
 rule hisat2_align:
     input:
         r1="concatenated_fastq/{sample}_R1.fastq.gz",
         r2="concatenated_fastq/{sample}_R2.fastq.gz",
         idx=expand("reference/hisat2_index/genome_ss.{i}.ht2", i=range(1, 9)),
     output:
-        bam="results/hisat2/{sample}.bam",
+        sam=temp("results/hisat2/{sample}.sam"),
         summary="results/hisat2/{sample}.hisat2_summary.txt",
     log:
         "logs/hisat2/{sample}.log",
@@ -141,11 +116,27 @@ rule hisat2_align:
             -1 {input.r1} -2 {input.r2} \
             --rg-id {params.rg_id} --rg SM:{params.rg_sm} \
             --summary-file {output.summary} \
-            | samtools view -bS - > {output.bam}
+            -S {output.sam}
         """
 
 
-# Sort and index BAM files
+rule sam_to_bam:
+    input:
+        "results/hisat2/{sample}.sam",
+    output:
+        "results/hisat2/{sample}.bam",
+    log:
+        "logs/sam_to_bam/{sample}.log",
+    container:
+        samtools_container
+    threads: 2
+    resources:
+        mem_mb=16000,
+        runtime=30,
+    shell:
+        "samtools view -bS {input} > {output}"
+
+
 rule sort_bam:
     input:
         "results/hisat2/{sample}.bam",
