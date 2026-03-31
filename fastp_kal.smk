@@ -1,44 +1,74 @@
 #!/usr/bin/env python3
 
 
-fastp    = "docker://quay.io/biocontainers/fastp:0.23.4--hadf994f_2"
+fastp = "docker://quay.io/biocontainers/fastp:0.23.4--hadf994f_2"
 kallisto = "docker://quay.io/biocontainers/kallisto:0.50.1--h7d027ca_2"
-multiqc  = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
+multiqc = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
 
 
 TRANSCRIPTOME = "data/reference/JN3_transcript_clean.fa"
 
 SAMPLES = [
     # Batch 1 mutants
-    "D2-2-1", "D2-2-2", "D2-2-3",
-    "D2-3-1", "D2-3-2", "D2-3-3",
-    "D2-4-1", "D2-4-2", "D2-4-3",
+    "D2-2-1",
+    "D2-2-2",
+    "D2-2-3",
+    "D2-3-1",
+    "D2-3-2",
+    "D2-3-3",
+    "D2-4-1",
+    "D2-4-2",
+    "D2-4-3",
     # Batch 1 wildtype
-    "D5-5-1", "D5-5-2", "D5-5-3",
+    "D5-5-1",
+    "D5-5-2",
+    "D5-5-3",
     # Batch 2 mutants
-    "A1-1-1", "A1-1-2", "A1-1-3",
-    "A1-2-1", "A1-2-2", "A1-2-3",
-    "A1-3-1", "A1-3-2",
-    "A3-1",   "A3-2",   "A3-3",
-    "D1-1",   "D1-2",   "D1-3",
+    "A1-1-1",
+    "A1-1-2",
+    "A1-1-3",
+    "A1-2-1",
+    "A1-2-2",
+    "A1-2-3",
+    "A1-3-1",
+    "A1-3-2",
+    "A3-1",
+    "A3-2",
+    "A3-3",
+    "D1-1",
+    "D1-2",
+    "D1-3",
     # Batch 2 wildtype
-    "D5-6-1", "D5-6-2", "D5-6-3",
+    "D5-6-1",
+    "D5-6-2",
+    "D5-6-3",
     # Batch 3 mutants
-    "R1-1",   "R1-2",   "R1-3",
-    "R2-2-1", "R2-2-2", "R2-2-3",
-    "R2-3-1", "R2-3-2", "R2-3-3",
-    "R2-4-1", "R2-4-2", "R2-4-3",
-    "R2-5-1", "R2-5-2", "R2-5-3",
+    "R1-1",
+    "R1-2",
+    "R1-3",
+    "R2-2-1",
+    "R2-2-2",
+    "R2-2-3",
+    "R2-3-1",
+    "R2-3-2",
+    "R2-3-3",
+    "R2-4-1",
+    "R2-4-2",
+    "R2-4-3",
+    "R2-5-1",
+    "R2-5-2",
+    "R2-5-3",
     # Batch 3 wildtype
-    "D5-7-1", "D5-7-2", "D5-7-3",
+    "D5-7-1",
+    "D5-7-2",
+    "D5-7-3",
 ]
 
 
 rule all:
     input:
-
-        expand("results/fastp/{sample}.html",              sample=SAMPLES),
-        expand("results/kallisto/{sample}/abundance.tsv",  sample=SAMPLES),
+        expand("results/fastp/{sample}.html", sample=SAMPLES),
+        expand("results/kallisto/{sample}/abundance.tsv", sample=SAMPLES),
         "results/multiqc/multiqc_report.html",
 
 
@@ -99,6 +129,7 @@ rule fastp:
             2> {log}
         """
 
+
 rule kallisto_quant:
     input:
         r1="results/fastp/{sample}_R1.fastq.gz",
@@ -136,8 +167,8 @@ rule kallisto_quant:
 
 rule multiqc:
     input:
-        fastp_json=expand("results/fastp/{sample}.json",              sample=SAMPLES),
-        kallisto_log=expand("logs/kallisto/{sample}.log",             sample=SAMPLES),
+        fastp_json=expand("results/fastp/{sample}.json", sample=SAMPLES),
+        kallisto_log=expand("logs/kallisto/{sample}.log", sample=SAMPLES),
     output:
         "results/multiqc/multiqc_report.html",
     log:
