@@ -20,4 +20,4 @@ mkdir -p $TMPDIR
 chmod +x profiles/bunya/status-sacct-robust.sh
 
 # Run snakemake
-snakemake -s rnaseq_hisat2.smk --profile profiles/bunya/ 
+snakemake -s fastp_kal.smk --profile profiles/bunya/ 
