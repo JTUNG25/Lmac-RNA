@@ -13,6 +13,31 @@ GTF = "data/genome/JN3.gtf"
 (all_samples,) = glob_wildcards("concatenated_fastq/{sample}_R1.fastq.gz")
 SAMPLES = all_samples
 
+# Define mutant groups
+MUTANTS = [
+    "D2-2",
+    "D2-3",
+    "D2-4",  # Batch 1 mutants
+    "D5-5",  # Batch 1 wildtype
+    "A1-1",
+    "A1-2",
+    "A1-3",  # Batch 2 mutants
+    "A3",
+    "D1",  # Batch 2 mutants
+    "D5-6",  # Batch 2 wildtype
+    "R1",
+    "R2-2",
+    "R2-3",
+    "R2-4",
+    "R2-5",  # Batch 3 mutants
+    "D5-7",  # Batch 3 wildtype
+]
+
+
+# Helper function to get samples for each mutant
+def get_replicates(mutant):
+    return [s for s in SAMPLES if s.startswith(mutant + "-") or s == mutant]
+
 
 rule target:
     input:
@@ -23,6 +48,7 @@ rule target:
         expand("results/hisat2/{sample}.sorted.bam.bai", sample=SAMPLES),
         expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
         "results/stats/alignment_summary.txt",
+        expand("results/merged/{condition}.merged.sorted.bam", condition=MUTANTS),
 
 
 rule fastqc:
@@ -150,6 +176,31 @@ rule sort_bam:
     shell:
         """
         samtools sort -@ {threads} -o {output.bam} {input}
+        samtools index {output.bam}
+        """
+
+
+rule merge_bams:
+    input:
+        lambda wildcards: expand(
+            "results/hisat2/{sample}.sorted.bam",
+            sample=get_replicates(wildcards.condition),
+        ),
+    output:
+        bam="results/merged/{condition}.merged.sorted.bam",
+        bai="results/merged/{condition}.merged.sorted.bam.bai",
+    log:
+        "logs/merge_bams/{condition}.log",
+    container:
+        samtools
+    threads: 4
+    resources:
+        mem_mb=16000,
+        runtime=60,
+    shell:
+        """
+        mkdir -p results/merged
+        samtools merge -@ {threads} {output.bam} {input}
         samtools index {output.bam}
         """
 
