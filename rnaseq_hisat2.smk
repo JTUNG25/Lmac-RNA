@@ -2,7 +2,7 @@
 
 # Container definitions
 fastqc = "docker://quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0"
-multiqc = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
+multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 hisat2 = "docker://quay.io/biocontainers/hisat2:2.2.1--h1b792b2_3"
 samtools = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 
-fastp = "docker://quay.io/biocontainers/fastp:0.23.4--hadf994f_2"
-kallisto = "docker://quay.io/biocontainers/kallisto:0.50.1--h7d027ca_2"
-multiqc = "docker://quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0"
+fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
+kallisto = "docker://quay.io/biocontainers/kallisto:0.51.1--h2b92561_2"
+multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 
 
 TRANSCRIPTOME = "data/reference/JN3_transcript_clean.fa"
