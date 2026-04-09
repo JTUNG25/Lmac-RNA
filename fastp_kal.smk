@@ -9,59 +9,25 @@ multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 TRANSCRIPTOME = "data/reference/JN3_transcript_clean.fa"
 
 SAMPLES = [
-    # Batch 1 mutants
-    "D2-2-1",
-    "D2-2-2",
-    "D2-2-3",
-    "D2-3-1",
-    "D2-3-2",
-    "D2-3-3",
-    "D2-4-1",
-    "D2-4-2",
-    "D2-4-3",
-    # Batch 1 wildtype
-    "D5-5-1",
-    "D5-5-2",
-    "D5-5-3",
-    # Batch 2 mutants
-    "A1-1-1",
-    "A1-1-2",
-    "A1-1-3",
-    "A1-2-1",
-    "A1-2-2",
-    "A1-2-3",
-    "A1-3-1",
-    "A1-3-2",
-    "A3-1",
-    "A3-2",
-    "A3-3",
-    "D1-1",
-    "D1-2",
-    "D1-3",
-    # Batch 2 wildtype
-    "D5-6-1",
-    "D5-6-2",
-    "D5-6-3",
-    # Batch 3 mutants
-    "R1-1",
-    "R1-2",
-    "R1-3",
-    "R2-2-1",
-    "R2-2-2",
-    "R2-2-3",
-    "R2-3-1",
-    "R2-3-2",
-    "R2-3-3",
-    "R2-4-1",
-    "R2-4-2",
-    "R2-4-3",
-    "R2-5-1",
-    "R2-5-2",
-    "R2-5-3",
-    # Batch 3 wildtype
-    "D5-7-1",
-    "D5-7-2",
-    "D5-7-3",
+    "A13-1-1",
+    "A13-1-2",
+    "A13-1-3",
+    "A13-2-1",
+    "A13-2-2",
+    "A13-2-3",
+    "R12-1-1",
+    "R12-1-2",
+    "R12-1-3",
+    "R12-2-1",
+    "R12-2-2",
+    "R12-2-3",
+    "R12-3-1",
+    "R12-3-2",
+    "R12-3-3",
+    # Batch WT
+    "WT-1-1",
+    "WT-1-2",
+    "WT-1-3",
 ]
 
 
@@ -99,8 +65,8 @@ rule kallisto_index:
 # ── Adapter trimming and QC with fastp ───────────────────────────────────────
 rule fastp:
     input:
-        r1="concatenated_fastq/{sample}_R1.fastq.gz",
-        r2="concatenated_fastq/{sample}_R2.fastq.gz",
+        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
+        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
     output:
         r1="results/fastp/{sample}_R1.fastq.gz",
         r2="results/fastp/{sample}_R2.fastq.gz",
@@ -170,7 +136,7 @@ rule multiqc:
         fastp_json=expand("results/fastp/{sample}.json", sample=SAMPLES),
         kallisto_log=expand("logs/kallisto/{sample}.log", sample=SAMPLES),
     output:
-        "results/multiqc/multiqc_report.html",
+        "results/multiqc/multiqc_report2.html",
     log:
         "logs/multiqc/multiqc.log",
     container:
