@@ -13,24 +13,13 @@ GTF = "data/genome/JN3.gtf"
 (all_samples,) = glob_wildcards("concatenated_fastq/{sample}_R1.fastq.gz")
 SAMPLES = all_samples
 
-# Define mutant groups
 MUTANTS = [
-    "D2-2",
-    "D2-3",
-    "D2-4",  # Batch 1 mutants
-    "D5-5",  # Batch 1 wildtype
-    "A1-1",
-    "A1-2",
-    "A1-3",  # Batch 2 mutants
-    "A3",
-    "D1",  # Batch 2 mutants
-    "D5-6",  # Batch 2 wildtype
-    "R1",
-    "R2-2",
-    "R2-3",
-    "R2-4",
-    "R2-5",  # Batch 3 mutants
-    "D5-7",  # Batch 3 wildtype
+    "A13-1",
+    "A13-2",
+    "R12-1",
+    "R12-2",
+    "R12-3",
+    "WT-1",  
 ]
 
 
