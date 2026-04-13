@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8GB
 #SBATCH --time=24:00:00
-#SBATCH --job-name=fastp_kallisto
+#SBATCH --job-name=hisat2
 #SBATCH --output=sm.log
 
 source /sw/local/rocky8/noarch/rcc/software/miniforge/24.11.3-0/etc/profile.d/conda.sh
@@ -20,4 +20,4 @@ mkdir -p $TMPDIR
 chmod +x profiles/bunya/status-sacct-robust.sh
 
 # Run snakemake
-snakemake -s fastp_kal.smk --profile profiles/bunya/ 
+snakemake -s rnaseq_hisat2.smk --profile profiles/bunya/ 

@@ -10,7 +10,7 @@ GENOME = "data/genome/JN3.fasta"
 GTF = "data/genome/JN3.gtf"
 
 
-(all_samples,) = glob_wildcards("concatenated_fastq/{sample}_R1.fastq.gz")
+(all_samples,) = glob_wildcards("raw_data_2/merged/{sample}_R1.fastq.gz")
 SAMPLES = all_samples
 
 MUTANTS = [
@@ -37,13 +37,13 @@ rule target:
         expand("results/hisat2/{sample}.sorted.bam.bai", sample=SAMPLES),
         expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
         "results/stats/alignment_summary.txt",
-        expand("results/merged/{condition}.merged.sorted.bam", condition=MUTANTS),
+        expand("results/merged/{condition}.merged.sorted.bam", condition=MUTANTS)
 
 
 rule fastqc:
     input:
-        r1="concatenated_fastq/{sample}_R1.fastq.gz",
-        r2="concatenated_fastq/{sample}_R2.fastq.gz",
+        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
+        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
     output:
         r1_html="results/fastqc/{sample}_R1_fastqc.html",
         r1_zip="results/fastqc/{sample}_R1_fastqc.zip",
@@ -102,8 +102,8 @@ rule build_hisat2_index_with_ss:
 
 rule hisat2_align:
     input:
-        r1="concatenated_fastq/{sample}_R1.fastq.gz",
-        r2="concatenated_fastq/{sample}_R2.fastq.gz",
+        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
+        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
         idx=expand("reference/hisat2_index/genome_ss.{i}.ht2", i=range(1, 9)),
     output:
         sam=temp("results/hisat2/{sample}.sam"),
