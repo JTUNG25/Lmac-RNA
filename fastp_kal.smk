@@ -136,7 +136,7 @@ rule multiqc:
         fastp_json=expand("results/fastp/{sample}.json", sample=SAMPLES),
         kallisto_log=expand("logs/kallisto/{sample}.log", sample=SAMPLES),
     output:
-        "results/multiqc/multiqc_report2.html",
+        "results/multiqc/multiqc_report.html",
     log:
         "logs/multiqc/multiqc.log",
     container:
