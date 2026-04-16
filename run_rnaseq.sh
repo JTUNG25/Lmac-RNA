@@ -13,7 +13,7 @@ conda activate snakemake8
 # Set working directory (change this to your project directory)
 cd /QRISdata/Q9141/lmac_rna_fresh
 
-export TMPDIR=/QRISdata/Q9141/lmac_rna_fresh/tmp
+export TMPDIR=/QRISdata/Q9141/lmac_rna/tmp
 mkdir -p $TMPDIR
 
 # Make status script executable
