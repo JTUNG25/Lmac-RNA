@@ -49,14 +49,13 @@ rule repeatmodeler_build_db:
     input:
         GENOME,
     output:
-        # BuildDatabase writes .nhr/.nin/.nsq — use .nhr as sentinel
         "results/repeatmodeler/JN3_db.nhr",
     params:
         prefix = "results/repeatmodeler/JN3_db",
     threads: 1
     resources:
-        mem_mb  = 8000,
-        runtime = 30,
+        mem_mb  = 32000,
+        runtime = 60,
     container:
         repeatmodeler
     shell:
