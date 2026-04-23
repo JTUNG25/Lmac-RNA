@@ -72,17 +72,16 @@ rule repeatmodeler_run:
         outdir = "results/repeatmodeler",
     threads: 24
     resources:
-        mem_mb  = 64000,
+        mem_mb  = 128000,
         runtime = 1440,
     container:
         repeatmodeler
     shell:
         """
         RepeatModeler -database {params.prefix} \
-                      -pa {threads} \
+                      -threads {threads} \
                       -LTRStruct \
                       -dir {params.outdir}
-        # RepeatModeler names the library after the db prefix
         mv {params.outdir}/JN3_db-families.fa {output}
         """
 
