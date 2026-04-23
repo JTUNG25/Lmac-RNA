@@ -122,7 +122,6 @@ rule repeatmasker:
                      -dir {params.outdir} \
                      {input.genome}
         mv {params.outdir}/JN3.fasta.masked {output.masked}
-        mv {params.outdir}/JN3.fasta.out.gff {output.gff}
         """
 
 
