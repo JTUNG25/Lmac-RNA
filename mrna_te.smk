@@ -33,8 +33,9 @@ rule all:
         # TE annotation
         "results/repeatmodeler/JN3-families.fa",
         GENOME_SM,
+        TE_GFF,
         TE_GTF,
-        # mRNA alignment + TE DE
+        TE_BED,
         expand("results/star/{sample}/Aligned.sortedByCoord.out.bam",
                sample=MRNA_SAMPLES),
         "results/tetranscripts/mrna/lepto_mrna.DESeq2.TE_results.txt",
