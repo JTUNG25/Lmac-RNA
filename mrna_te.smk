@@ -70,6 +70,7 @@ rule repeatmodeler_run:
     params:
         prefix = "results/repeatmodeler/JN3_db",
         outdir = "results/repeatmodeler",
+        nfs_outdir = "results/repeatmodeler",
     threads: 24
     resources:
         mem_mb  = 128000,
