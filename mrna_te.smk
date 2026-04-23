@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-repeatmodeler = "docker://dfam/tetools:1.88.5"
-star          = "docker://quay.io/biocontainers/star:2.7.11a--h0033a41_0"
-samtools      = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
-tetranscripts = "docker://quay.io/biocontainers/tetranscripts:2.1.3--py_0"
-bedtools      = "docker://quay.io/biocontainers/bedtools:2.31.1--hf5e1c6e_0"
+repeatmodeler = "/QRISdata/Q9141/lmac_rna/sifs/tetools.sif"
+star          = "/QRISdata/Q9141/lmac_rna/sifs/star.sif"
+samtools      = "/QRISdata/Q9141/lmac_rna/sifs/samtools.sif"
+tetranscripts = "/QRISdata/Q9141/lmac_rna/sifs/tetranscripts.sif"
+bedtools      = "/QRISdata/Q9141/lmac_rna/sifs/bedtools.sif"
 
 import os
 from pathlib import Path
