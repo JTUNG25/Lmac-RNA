@@ -78,11 +78,23 @@ rule repeatmodeler_run:
         repeatmodeler
     shell:
         """
-        RepeatModeler -database {params.prefix} \
-                      -threads {threads} \
-                      -LTRStruct \
-                      -dir {params.outdir}
-        mv {params.outdir}/JN3_db-families.fa {output}
+        # ── run on local scratch to avoid NFS I/O bottleneck ──────────────
+        SCRATCH_DIR=/scratch/temp/$SLURM_JOB_ID/repeatmodeler
+        mkdir -p $SCRATCH_DIR
+
+        # copy database files to scratch
+        cp {params.prefix}.* $SCRATCH_DIR/
+
+        RepeatModeler \
+            -database $SCRATCH_DIR/JN3_db \
+            -threads {threads} \
+            -LTRStruct \
+            -dir $SCRATCH_DIR
+
+        # copy results back to NFS
+        cp $SCRATCH_DIR/JN3_db-families.fa {output}
+        cp $SCRATCH_DIR/consensi.fa {params.nfs_outdir}/ 2>/dev/null || true
+        cp $SCRATCH_DIR/families.stk {params.nfs_outdir}/ 2>/dev/null || true
         """
 
 
