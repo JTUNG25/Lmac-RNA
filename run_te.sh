@@ -32,5 +32,5 @@ snakemake -s mrna_te.smk --unlock --profile profiles/bunya/
 
 snakemake -s mrna_te.smk \
     --profile profiles/bunya/ \
-    --rerun-incomplete false \
+    --rerun-incomplete=false \
     --singularity-args "--bind /QRISdata/Q9141 --bind $TMPDIR"
