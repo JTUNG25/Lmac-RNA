@@ -276,7 +276,6 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
         index="data/star_index",
     output:
         bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
         log="results/star/{sample}/Log.final.out",
     container:
         star
