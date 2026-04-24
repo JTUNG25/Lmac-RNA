@@ -38,6 +38,10 @@ rule all:
         expand(
             "results/star/{sample}/Aligned.sortedByCoord.out.bam", sample=MRNA_SAMPLES
         ),
+        expand(
+            "results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
+            sample=MRNA_SAMPLES,
+        ),
         "results/tetranscripts/mrna/lepto_mrna.DESeq2.TE_results.txt",
 
 
@@ -260,28 +264,28 @@ increase to 13 for larger assemblies (STAR will warn if wrong).
 
 rule star_align_mrna:
     """
-    Key flags for TE analysis:
-      --outSAMmultNmax -1         → report ALL multi-mapping alignments
-      --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
-      --winAnchorMultimapNmax 200 → needed when multNmax is high
-    TEtranscripts EM uses these to redistribute counts probabilistically.
-    """
+Key flags for TE analysis:
+  --outSAMmultNmax -1         → report ALL multi-mapping alignments
+  --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
+  --winAnchorMultimapNmax 200 → needed when multNmax is high
+TEtranscripts EM uses these to redistribute counts probabilistically.
+"""
     input:
-        r1    = "data/fastp/{sample}_R1.fastq.gz",
-        r2    = "data/fastp/{sample}_R2.fastq.gz",
-        index = "data/star_index",
+        r1="data/fastp/{sample}_R1.fastq.gz",
+        r2="data/fastp/{sample}_R2.fastq.gz",
+        index="data/star_index",
     output:
-        bam = "results/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bai = "results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
-        log = "results/star/{sample}/Log.final.out",
+        bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
+        bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
+        log="results/star/{sample}/Log.final.out",
     container:
         star
     threads: 16
     resources:
-        mem_mb  = 128000,
-        runtime = 120,
+        mem_mb=256000,
+        runtime=120,
     params:
-        prefix = "results/star/{sample}/",
+        prefix="results/star/{sample}/",
     shell:
         """
         STAR --runMode alignReads \
@@ -299,10 +303,22 @@ rule star_align_mrna:
              --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
              --outFileNamePrefix {params.prefix} \
              --runThreadN {threads}
-
-        singularity exec --bind /QRISdata/Q9141 \
-            {samtools} samtools index {output.bam}
         """
+
+
+rule samtools_index:
+    input:
+        bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
+    output:
+        bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
+    container:
+        samtools
+    threads: 4
+    resources:
+        mem_mb=8000,
+        runtime=30,
+    shell:
+        "samtools index -@ {threads} {input.bam}"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
