@@ -30,7 +30,6 @@ GENE_GTF = "data/genome/JN3.gtf"
 
 rule all:
     input:
-        # TE annotation
         "results/repeatmodeler/JN3-families.fa",
         GENOME_SM,
         TE_GFF,
@@ -59,9 +58,9 @@ rule repeatmodeler_build_db:
         mem_mb=32000,
         runtime=60,
     params:
-        prefix="results/repeatmodeler/JN3_db",
+        db="results/repeatmodeler/JN3_db",
     shell:
-        "BuildDatabase -name {params.prefix} -engine ncbi {input}"
+        "BuildDatabase -name {params.db} -engine ncbi {input}"
 
 
 rule repeatmodeler_run:
@@ -76,7 +75,7 @@ rule repeatmodeler_run:
         mem_mb=128000,
         runtime=1440,
     params:
-        prefix="results/repeatmodeler/JN3_db",
+        db="results/repeatmodeler/JN3_db",
         outdir="results/repeatmodeler",
     shell:
         """
@@ -85,7 +84,7 @@ rule repeatmodeler_run:
         mkdir -p $SCRATCH_DIR
 
         # copy database files to scratch
-        cp {params.prefix}.* $SCRATCH_DIR/
+        cp {params.db}.* $SCRATCH_DIR/
 
         RepeatModeler \
             -database $SCRATCH_DIR/JN3_db \
@@ -111,6 +110,8 @@ Runs on local scratch to avoid NFS I/O bottleneck.
         lib="results/repeatmodeler/JN3-families.fa",
     output:
         cat="results/repeatmasker/JN3.fasta.cat.gz",
+        out="results/repeatmasker/JN3.fasta.out",
+        gff="results/repeatmasker/JN3.fasta.out.gff",
     container:
         repeatmodeler
     threads: 24
@@ -126,20 +127,20 @@ Runs on local scratch to avoid NFS I/O bottleneck.
 
         RepeatMasker \
             -lib    {input.lib} \
-            -nopost \
+            -gff \
             -pa     6 \
             -dir    $SCRATCH_DIR \
             {input.genome}
 
         mv $SCRATCH_DIR/JN3.fasta.cat.gz {output.cat}
+        mv $SCRATCH_DIR/JN3.fasta.out    {output.out}
+        mv $SCRATCH_DIR/JN3.fasta.out.gff {output.gff}
         """
 
 
 rule repeatmasker_postprocess:
     """
 Generate soft-masked genome from existing RepeatMasker .out file.
-Bypasses ProcessRepeats entirely — bedtools maskfasta is simpler
-and the .out file already contains all repeat coordinates.
 """
     input:
         genome=GENOME,
