@@ -28,7 +28,6 @@ mkdir -p $SIF_DIR
 
 chmod +x profiles/bunya/status-sacct-robust.sh
 
-# unlock stale lock from previous killed run
 snakemake -s mrna_te.smk --unlock --profile profiles/bunya/
 
 snakemake -s mrna_te.smk \
