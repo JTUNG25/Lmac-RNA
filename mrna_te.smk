@@ -266,7 +266,7 @@ Key flags for TE analysis:
   --winAnchorMultimapNmax 200 → needed when multNmax is high
 TEtranscripts EM uses these to redistribute counts probabilistically.
 """
-    input:
+     input:
         r1="data/fastp/{sample}_R1.fastq.gz",
         r2="data/fastp/{sample}_R2.fastq.gz",
         index="data/star_index",
@@ -296,6 +296,7 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
              --winAnchorMultimapNmax 200 \
              --alignSoftClipAtReferenceEnds No \
              --limitBAMsortRAM 30000000000 \
+             --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
              --outFileNamePrefix {params.prefix} \
              --runThreadN {threads}
 
