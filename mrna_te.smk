@@ -32,7 +32,6 @@ rule all:
     input:
         # TE annotation
         "results/repeatmodeler/JN3-families.fa",
-        "results/repeatmasker/JN3.fasta.cat.gz",
         GENOME_SM,
         TE_GFF,
         TE_GTF,
@@ -137,29 +136,37 @@ Runs on local scratch to avoid NFS I/O bottleneck.
 
 
 rule repeatmasker_postprocess:
+    """
+Generate soft-masked genome from existing RepeatMasker .out file.
+Bypasses ProcessRepeats entirely — bedtools maskfasta is simpler
+and the .out file already contains all repeat coordinates.
+"""
     input:
-        cat = "results/repeatmasker/JN3.fasta.cat.gz",
-        lib = "results/repeatmodeler/JN3-families.fa",
+        genome=GENOME,
+        out="results/repeatmasker/JN3.fasta.out",
     output:
-        masked = GENOME_SM,
-    params:
-        outdir = "results/repeatmasker",
-    threads: 4
-    resources:
-        mem_mb  = 16000,
-        runtime = 60,
+        masked=GENOME_SM,
     container:
-        repeatmodeler
+        bedtools
+    threads: 1
+    resources:
+        mem_mb=16000,
+        runtime=30,
     shell:
         """
-        ProcessRepeats \
-            -lib    {input.lib} \
-            -gff \
-            -xsmall \
-            -dir    {params.outdir} \
-            {input.cat}
+        # RepeatMasker .out starts with 3 header lines — skip them
+        # columns: score div del ins query start end left strand repeat class start end left id
+        tail -n +4 {input.out} | awk '{{
+            print $5 "\t" ($6-1) "\t" $7
+        }}' > /tmp/repeats_$SLURM_JOB_ID.bed
 
-        mv {params.outdir}/JN3.fasta.masked {output.masked}
+        bedtools maskfasta \
+            -fi   {input.genome} \
+            -bed  /tmp/repeats_$SLURM_JOB_ID.bed \
+            -fo   {output.masked} \
+            -soft
+
+        rm /tmp/repeats_$SLURM_JOB_ID.bed
         """
 
 
