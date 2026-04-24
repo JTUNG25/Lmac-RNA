@@ -259,17 +259,17 @@ increase to 13 for larger assemblies (STAR will warn if wrong).
 
 
 rule star_align_mrna:
-    """
-Key flags for TE analysis:
-  --outSAMmultNmax -1        → report ALL multi-mapping alignments
-  --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
-  --winAnchorMultimapNmax 200 → needed when multNmax is high
-TEtranscripts EM uses these to redistribute counts probabilistically.
-"""
-     input:
-        r1="data/fastp/{sample}_R1.fastq.gz",
-        r2="data/fastp/{sample}_R2.fastq.gz",
-        index="data/star_index",
+        """
+        Key flags for TE analysis:
+          --outSAMmultNmax -1        → report ALL multi-mapping alignments
+          --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
+          --winAnchorMultimapNmax 200 → needed when multNmax is high
+        TEtranscripts EM uses these to redistribute counts probabilistically.
+        """
+    input:
+            r1="data/fastp/{sample}_R1.fastq.gz",
+            r2="data/fastp/{sample}_R2.fastq.gz",
+            index="data/star_index",
     output:
         bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
         bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
@@ -300,7 +300,8 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
              --outFileNamePrefix {params.prefix} \
              --runThreadN {threads}
 
-        samtools index {output.bam}
+        singularity exec --bind /QRISdata/Q9141 \
+            {samtools} samtools index {output.bam}
         """
 
 
