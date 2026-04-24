@@ -1,63 +1,66 @@
 #!/usr/bin/env python3
 
 repeatmodeler = "/QRISdata/Q9141/lmac_rna/sifs/tetools.sif"
-star          = "/QRISdata/Q9141/lmac_rna/sifs/star.sif"
-samtools      = "/QRISdata/Q9141/lmac_rna/sifs/samtools.sif"
+star = "/QRISdata/Q9141/lmac_rna/sifs/star.sif"
+samtools = "/QRISdata/Q9141/lmac_rna/sifs/samtools.sif"
 tetranscripts = "/QRISdata/Q9141/lmac_rna/sifs/tetranscripts.sif"
-bedtools      = "/QRISdata/Q9141/lmac_rna/sifs/bedtools.sif"
+bedtools = "/QRISdata/Q9141/lmac_rna/sifs/bedtools.sif"
 
 import os
 from pathlib import Path
 
 (_all_r1,) = glob_wildcards("data/fastp/{sample}_R1.fastq.gz")
-MRNA_SAMPLES = [s for s in _all_r1
-                if os.path.exists(f"data/fastp/{s}_R2.fastq.gz")]
+MRNA_SAMPLES = [s for s in _all_r1 if os.path.exists(f"data/fastp/{s}_R2.fastq.gz")]
 
 # Define WT vs mutant splits for TEtranscripts
 
-WT_MRNA  = [s for s in MRNA_SAMPLES if s.startswith("WT") or s.startswith("D5")]
-MUT_MRNA = [s for s in MRNA_SAMPLES if not s.startswith("WT") and not s.startswith("D5")]
+WT_MRNA = [s for s in MRNA_SAMPLES if s.startswith("WT") or s.startswith("D5")]
+MUT_MRNA = [
+    s for s in MRNA_SAMPLES if not s.startswith("WT") and not s.startswith("D5")
+]
 
-GENOME    = "data/genome/JN3.fasta"
+GENOME = "data/genome/JN3.fasta"
 GENOME_NAME = "JN3"
 GENOME_SM = "data/genome/JN3.masked.fasta"
-TE_GFF    = "data/genome/JN3.te.gff3"
-TE_GTF    = "data/genome/JN3.te.gtf"
-TE_BED    = "data/genome/JN3.te.bed"
-GENE_GTF  = "data/genome/JN3.gtf"
-
+TE_GFF = "data/genome/JN3.te.gff3"
+TE_GTF = "data/genome/JN3.te.gtf"
+TE_BED = "data/genome/JN3.te.bed"
+GENE_GTF = "data/genome/JN3.gtf"
 
 
 rule all:
     input:
         # TE annotation
         "results/repeatmodeler/JN3-families.fa",
+        "results/repeatmasker/JN3.fasta.cat.gz",
         GENOME_SM,
         TE_GFF,
         TE_GTF,
         TE_BED,
-        expand("results/star/{sample}/Aligned.sortedByCoord.out.bam",
-               sample=MRNA_SAMPLES),
+        expand(
+            "results/star/{sample}/Aligned.sortedByCoord.out.bam", sample=MRNA_SAMPLES
+        ),
         "results/tetranscripts/mrna/lepto_mrna.DESeq2.TE_results.txt",
-       
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — TE ANNOTATION
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 rule repeatmodeler_build_db:
     input:
         GENOME,
     output:
         "results/repeatmodeler/JN3_db.nhr",
-    params:
-        prefix = "results/repeatmodeler/JN3_db",
-    threads: 1
-    resources:
-        mem_mb  = 32000,
-        runtime = 60,
     container:
         repeatmodeler
+    threads: 1
+    resources:
+        mem_mb=32000,
+        runtime=60,
+    params:
+        prefix="results/repeatmodeler/JN3_db",
     shell:
         "BuildDatabase -name {params.prefix} -engine ncbi {input}"
 
@@ -67,16 +70,15 @@ rule repeatmodeler_run:
         "results/repeatmodeler/JN3_db.nhr",
     output:
         "results/repeatmodeler/JN3-families.fa",
-    params:
-        prefix = "results/repeatmodeler/JN3_db",
-        outdir = "results/repeatmodeler",
-        nfs_outdir = "results/repeatmodeler",
-    threads: 24
-    resources:
-        mem_mb  = 128000,
-        runtime = 1440,
     container:
         repeatmodeler
+    threads: 24
+    resources:
+        mem_mb=128000,
+        runtime=1440,
+    params:
+        prefix="results/repeatmodeler/JN3_db",
+        outdir="results/repeatmodeler",
     shell:
         """
         # ── run on local scratch to avoid NFS I/O bottleneck ──────────────
@@ -94,49 +96,85 @@ rule repeatmodeler_run:
 
         # copy results back to NFS
         cp $SCRATCH_DIR/JN3_db-families.fa {output}
-        cp $SCRATCH_DIR/consensi.fa {params.nfs_outdir}/ 2>/dev/null || true
-        cp $SCRATCH_DIR/families.stk {params.nfs_outdir}/ 2>/dev/null || true
+        cp $SCRATCH_DIR/consensi.fa {params.outdir}/ 2>/dev/null || true
+        cp $SCRATCH_DIR/families.stk {params.outdir}/ 2>/dev/null || true
         """
 
 
-rule repeatmasker:
+rule repeatmasker_align:
+    """
+Run RepeatMasker alignments only (-nopost skips post-processing).
+Output is JN3.fasta.cat.gz — the alignment archive.
+Runs on local scratch to avoid NFS I/O bottleneck.
+"""
     input:
-        genome = GENOME,
-        lib    = "results/repeatmodeler/JN3-families.fa",
+        genome=GENOME,
+        lib="results/repeatmodeler/JN3-families.fa",
     output:
-        masked = GENOME_SM,
-        gff    = "results/repeatmasker/JN3.fasta.out.gff",
-    params:
-        outdir  = "results/repeatmasker",
+        cat="results/repeatmasker/JN3.fasta.cat.gz",
+    container:
+        repeatmodeler
     threads: 24
     resources:
-        mem_mb  = 32000,
-        runtime = 480,
+        mem_mb=32000,
+        runtime=480,
+    params:
+        outdir="results/repeatmasker",
+    shell:
+        """
+        SCRATCH_DIR=/scratch/temp/$SLURM_JOB_ID/repeatmasker
+        mkdir -p $SCRATCH_DIR
+
+        RepeatMasker \
+            -lib    {input.lib} \
+            -nopost \
+            -pa     6 \
+            -dir    $SCRATCH_DIR \
+            {input.genome}
+
+        mv $SCRATCH_DIR/JN3.fasta.cat.gz {output.cat}
+        """
+
+
+rule repeatmasker_postprocess:
+    input:
+        cat = "results/repeatmasker/JN3.fasta.cat.gz",
+        lib = "results/repeatmodeler/JN3-families.fa",
+    output:
+        masked = GENOME_SM,
+    params:
+        outdir = "results/repeatmasker",
+    threads: 4
+    resources:
+        mem_mb  = 16000,
+        runtime = 60,
     container:
         repeatmodeler
     shell:
         """
-        RepeatMasker -lib {input.lib} \
-                     -gff -xsmall \
-                     -pa {threads} \
-                     -dir {params.outdir} \
-                     {input.genome}
+        ProcessRepeats \
+            -lib    {input.lib} \
+            -gff \
+            -xsmall \
+            -dir    {params.outdir} \
+            {input.cat}
+
         mv {params.outdir}/JN3.fasta.masked {output.masked}
         """
 
 
 rule make_te_gtf:
     """
-    RepeatMasker GFF → GTF for TEtranscripts.
-    gene_id  = TE superfamily (e.g. Gypsy, Copia, DNA/hAT …)
-    transcript_id = unique locus identifier  Chr:start-end
-    """
+RepeatMasker GFF → GTF for TEtranscripts.
+gene_id  = TE superfamily (e.g. Gypsy, Copia, DNA/hAT …)
+transcript_id = unique locus identifier  Chr:start-end
+"""
     input:
-        gff = "results/repeatmasker/JN3.fasta.out.gff",
+        gff="results/repeatmasker/JN3.fasta.out.gff",
     output:
-        gff = TE_GFF,
-        gtf = TE_GTF,
-        bed = TE_BED,
+        gff=TE_GFF,
+        gtf=TE_GTF,
+        bed=TE_BED,
     shell:
         r"""
         # ── clean GFF3 with unique IDs ─────────────────────────────────────
@@ -181,27 +219,27 @@ rule make_te_gtf:
         """
 
 
-
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 2 — STAR INDEX + mRNA ALIGNMENT
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 rule star_index:
     """
-    Build index on soft-masked genome.
-    genomeSAindexNbases: use 11 for ~40 Mb fungal genomes,
-    increase to 13 for larger assemblies (STAR will warn if wrong).
-    """
+Build index on soft-masked genome.
+genomeSAindexNbases: use 11 for ~40 Mb fungal genomes,
+increase to 13 for larger assemblies (STAR will warn if wrong).
+"""
     input:
-        genome = GENOME_SM,
+        genome=GENOME_SM,
     output:
-        index = directory("data/star_index"),
-    threads: 16
-    resources:
-        mem_mb  = 32000,
-        runtime = 60,
+        index=directory("data/star_index"),
     container:
         star
+    threads: 16
+    resources:
+        mem_mb=32000,
+        runtime=60,
     shell:
         """
         STAR --runMode genomeGenerate \
@@ -214,28 +252,28 @@ rule star_index:
 
 rule star_align_mrna:
     """
-    Key flags for TE analysis:
-      --outSAMmultNmax -1        → report ALL multi-mapping alignments
-      --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
-      --winAnchorMultimapNmax 200 → needed when multNmax is high
-    TEtranscripts EM uses these to redistribute counts probabilistically.
-    """
+Key flags for TE analysis:
+  --outSAMmultNmax -1        → report ALL multi-mapping alignments
+  --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
+  --winAnchorMultimapNmax 200 → needed when multNmax is high
+TEtranscripts EM uses these to redistribute counts probabilistically.
+"""
     input:
-        r1    = "data/fastp/{sample}_R1.fastq.gz",
-        r2    = "data/fastp/{sample}_R2.fastq.gz",
-        index = "data/star_index",
+        r1="data/fastp/{sample}_R1.fastq.gz",
+        r2="data/fastp/{sample}_R2.fastq.gz",
+        index="data/star_index",
     output:
-        bam = "results/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bai = "results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
-        log = "results/star/{sample}/Log.final.out",
-    params:
-        prefix = "results/star/{sample}/",
-    threads: 16
-    resources:
-        mem_mb  = 32000,
-        runtime = 120,
+        bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
+        bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
+        log="results/star/{sample}/Log.final.out",
     container:
         star
+    threads: 16
+    resources:
+        mem_mb=32000,
+        runtime=120,
+    params:
+        prefix="results/star/{sample}/",
     shell:
         """
         STAR --runMode alignReads \
@@ -260,31 +298,30 @@ rule star_align_mrna:
 # SECTION 3 — TEtranscripts DE (genes + TEs jointly)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 rule tetranscripts:
     """
-    -t = treatment (mutant), -c = control (WT)
-    --mode multi : EM redistribution of multi-mappers (required for TEs)
-    --stranded   : set to 'yes'/'reverse' if stranded library, else 'no'
-    """
+-t = treatment (mutant), -c = control (WT)
+--mode multi : EM redistribution of multi-mappers (required for TEs)
+--stranded   : set to 'yes'/'reverse' if stranded library, else 'no'
+"""
     input:
-        wt_bams  = expand("results/star/{s}/Aligned.sortedByCoord.out.bam",
-                          s=WT_MRNA),
-        mut_bams = expand("results/star/{s}/Aligned.sortedByCoord.out.bam",
-                          s=MUT_MRNA),
-        gene_gtf = GENE_GTF,
-        te_gtf   = TE_GTF,
+        wt_bams=expand("results/star/{s}/Aligned.sortedByCoord.out.bam", s=WT_MRNA),
+        mut_bams=expand("results/star/{s}/Aligned.sortedByCoord.out.bam", s=MUT_MRNA),
+        gene_gtf=GENE_GTF,
+        te_gtf=TE_GTF,
     output:
-        te_res   = "results/tetranscripts/mrna/lepto_mrna.DESeq2.TE_results.txt",
-        gene_res = "results/tetranscripts/mrna/lepto_mrna.DESeq2.gene_results.txt",
-    params:
-        outdir  = "results/tetranscripts/mrna",
-        project = "lepto_mrna",
-    threads: 8
-    resources:
-        mem_mb  = 32000,
-        runtime = 240,
+        te_res="results/tetranscripts/mrna/lepto_mrna.DESeq2.TE_results.txt",
+        gene_res="results/tetranscripts/mrna/lepto_mrna.DESeq2.gene_results.txt",
     container:
         tetranscripts
+    threads: 8
+    resources:
+        mem_mb=32000,
+        runtime=240,
+    params:
+        outdir="results/tetranscripts/mrna",
+        project="lepto_mrna",
     shell:
         """
         TEtranscripts \
