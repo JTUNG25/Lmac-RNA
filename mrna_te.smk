@@ -295,6 +295,7 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
              --outFilterMultimapNmax 100 \
              --winAnchorMultimapNmax 200 \
              --alignSoftClipAtReferenceEnds No \
+             --limitBAMsortRAM 30000000000 \
              --outFileNamePrefix {params.prefix} \
              --runThreadN {threads}
 
