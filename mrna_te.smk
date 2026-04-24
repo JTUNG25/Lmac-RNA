@@ -278,7 +278,7 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
         star
     threads: 16
     resources:
-        mem_mb=32000,
+        mem_mb=128000,
         runtime=120,
     params:
         prefix="results/star/{sample}/",
