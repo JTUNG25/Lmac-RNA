@@ -360,6 +360,7 @@ rule tetranscripts:
             --mode multi \
             --padj 0.05 \
             --minread 1 \
-            --norm DESeq2 \
+            --norm DESeq_default \
+            --DESeq \
             --stranded no
         """
