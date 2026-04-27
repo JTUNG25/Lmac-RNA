@@ -42,7 +42,7 @@ rule all:
             "results/star/{sample}/Aligned.sortedByCoord.out.bam.bai",
             sample=MRNA_SAMPLES,
         ),
-        "results/tetranscripts/mrna/lepto_mrna_DESeq2_TE_results.txt",
+        "results/tetranscripts/mrna/lepto_mrna_DESeq_TE_results.txt",
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -337,8 +337,8 @@ rule tetranscripts:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/mrna/lepto_mrna_DESeq2_TE_results.txt",
-        gene_res="results/tetranscripts/mrna/lepto_mrna_DESeq2_gene_results.txt",
+        te_res="results/tetranscripts/mrna/lepto_mrna_DESeq_TE_results.txt",
+        gene_res="results/tetranscripts/mrna/lepto_mrna_DESeq_gene_results.txt",
     container:
         tetranscripts
     threads: 8
@@ -350,8 +350,6 @@ rule tetranscripts:
         project="lepto_mrna",
     shell:
         """
-        cd {params.outdir}
-
         TEtranscripts \
             -t {input.mut_bams} \
             -c {input.wt_bams} \
@@ -364,4 +362,8 @@ rule tetranscripts:
             --norm DESeq_default \
             --DESeq \
             --stranded no
+
+        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
+        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
+
         """
