@@ -22,7 +22,7 @@ max-status-checks-per-second: 10
 local-cores: 2
 cores: 50
 latency-wait: 60
-jobs: 128
+jobs: 20
 keep-going: true
 keep-storage-local-copies: true
 rerun-incomplete: false

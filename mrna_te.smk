@@ -298,7 +298,7 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
              --outFilterMultimapNmax 100 \
              --winAnchorMultimapNmax 200 \
              --alignSoftClipAtReferenceEnds No \
-             --limitBAMsortRAM 30000000000 \
+             --limitBAMsortRAM 10000000000 \
              --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
              --outFileNamePrefix {params.prefix} \
              --runThreadN {threads}
