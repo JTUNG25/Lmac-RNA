@@ -176,6 +176,11 @@ Generate soft-masked genome from existing RepeatMasker .out file.
 
 
 rule make_te_gtf:
+    """
+RepeatMasker GFF → GTF for TEtranscripts.
+Parses repeat name, class, family from RepeatMasker .out and .out.gff files.
+TEtranscripts requires: gene_id, transcript_id, family_id, class_id
+"""
     input:
         gff="results/repeatmasker/JN3.fasta.out.gff",
         out="results/repeatmasker/JN3.fasta.out",
@@ -183,34 +188,38 @@ rule make_te_gtf:
         gff=TE_GFF,
         gtf=TE_GTF,
         bed=TE_BED,
+    resources:
+        mem_mb=8000,
+        runtime=30,
     shell:
         r"""
+        SCRATCH_DIR=/tmp/te_gtf_$$
+        mkdir -p $SCRATCH_DIR
+
         # ── build class/family lookup from .out file ───────────────────────
-        # .out col 10=repeat_name, col 11=class/family (e.g. DNA/hAT, LTR/Gypsy)
         tail -n +4 {input.out} | awk '
         BEGIN {{ OFS="\t" }}
         {{
             split($11, cf, "/")
             class  = cf[1]
             family = cf[2] ? cf[2] : cf[1]
-            name   = $10
-            print name, class, family
-        }}' | sort -u > /tmp/te_class_$SLURM_JOB_ID.txt
+            print $10, class, family
+        }}' | sort -u > $SCRATCH_DIR/te_class.txt
 
         # ── clean GFF3 with unique IDs ─────────────────────────────────────
         grep -v "^#" {input.gff} | awk '
         BEGIN {{ OFS="\t" }}
         {{
-            match($9, /Target=Motif:([^ ]+)/, arr)
-            family = arr[1]
-            if (family == "") family = "Unknown"
-            locus  = $1 "_" $4 "_" $5
+            match($0, /Motif:([^"]+)"/, arr)
+            name  = arr[1]
+            if (name == "") name = "Unknown"
+            locus = $1 "_" $4 "_" $5
             print $1,$2,$3,$4,$5,$6,$7,$8,
-                  "ID=" locus ";Name=" family ";family=" family
-        }}' > {output.gff}
+                  "ID=" locus ";Name=" name ";family=" name
+        }}' > $SCRATCH_DIR/te.gff3
 
-        # ── convert to TEtranscripts-compatible GTF with class_id ──────────
-        grep -v "^#" {input.gff} | awk -v classfile=/tmp/te_class_$SLURM_JOB_ID.txt '
+        # ── convert to TEtranscripts-compatible GTF ────────────────────────
+        grep -v "^#" {input.gff} | awk -v classfile=$SCRATCH_DIR/te_class.txt '
         BEGIN {{
             OFS="\t"
             while ((getline line < classfile) > 0) {{
@@ -220,7 +229,7 @@ rule make_te_gtf:
             }}
         }}
         {{
-            match($9, /Target=Motif:([^ ]+)/, arr)
+            match($0, /Motif:([^"]+)"/, arr)
             name   = arr[1]
             family = family_map[name] ? family_map[name] : "Unknown"
             class  = class_map[name]  ? class_map[name]  : "Unknown"
@@ -230,18 +239,23 @@ rule make_te_gtf:
                   "transcript_id \"" locus "\"; " \
                   "family_id \"" family "\"; " \
                   "class_id \"" class "\";"
-        }}' > {output.gtf}
-
-        rm /tmp/te_class_$SLURM_JOB_ID.txt
+        }}' > $SCRATCH_DIR/te.gtf
 
         # ── BED for sRNA ───────────────────────────────────────────────────
-        grep -v "^#" {output.gff} | awk '
+        grep -v "^#" $SCRATCH_DIR/te.gff3 | awk '
         BEGIN {{ OFS="\t" }}
         {{
             match($9, /ID=([^;]+)/,     id_arr)
             match($9, /family=([^;]+)/, fam_arr)
             print $1, ($4-1), $5, id_arr[1] ";" fam_arr[1], 0, $7
-        }}' | sort -k1,1 -k2,2n > {output.bed}
+        }}' | sort -k1,1 -k2,2n > $SCRATCH_DIR/te.bed
+
+        # ── copy to NFS only at the end ────────────────────────────────────
+        cp $SCRATCH_DIR/te.gff3 {output.gff}
+        cp $SCRATCH_DIR/te.gtf  {output.gtf}
+        cp $SCRATCH_DIR/te.bed  {output.bed}
+
+        rm -rf $SCRATCH_DIR
         """
 
 
