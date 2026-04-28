@@ -193,7 +193,6 @@ transcript_id = unique locus identifier  Chr:start-end
         grep -v "^#" {input.gff} | awk '
         BEGIN {{ OFS="\t" }}
         {{
-            # RepeatMasker GFF Target field: "Target=Motif:FamilyName start end"
             match($9, /Target=Motif:([^ ]+)/, arr)
             family = arr[1]
             if (family == "") family = "Unknown"
@@ -203,6 +202,7 @@ transcript_id = unique locus identifier  Chr:start-end
         }}' > {output.gff}
 
         # ── convert to TEtranscripts-compatible GTF ────────────────────────
+        echo '##TEtranscripts TE annotation' > {output.gtf}
         awk '
         BEGIN {{ OFS="\t" }}
         !/^#/ {{
@@ -216,7 +216,7 @@ transcript_id = unique locus identifier  Chr:start-end
                   "gene_id \"" family "\"; " \
                   "transcript_id \"" locus "\"; " \
                   "family_id \"" family "\";"
-        }}' {output.gff} > {output.gtf}
+        }}' {output.gff} >> {output.gtf}
 
         # ── convert to BED for sRNA ────────────────────────
         grep -v "^#" {output.gff} | awk '
