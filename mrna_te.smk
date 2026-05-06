@@ -358,6 +358,7 @@ rule tetranscripts:
 -t = treatment (mutant), -c = control (WT)
 --mode multi : EM redistribution of multi-mappers (required for TEs)
 --stranded   : set to 'yes'/'reverse' if stranded library, else 'no'
+--sortByPos  : CRITICAL - tells TEtranscripts that BAMs are coordinate-sorted
 """
     input:
         wt_bams=expand("results/star/{s}/Aligned.sortedByCoord.out.bam", s=WT_MRNA),
@@ -390,6 +391,7 @@ rule tetranscripts:
             --norm DESeq_default \
             --DESeq \
             --stranded no
+            --sortByPos
 
         mv {params.project}_DESeq_TE_results.txt   {output.te_res}
         mv {params.project}_DESeq_gene_results.txt {output.gene_res}
