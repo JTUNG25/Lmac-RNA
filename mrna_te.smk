@@ -390,7 +390,7 @@ rule tetranscripts:
             --minread 1 \
             --norm DESeq_default \
             --DESeq \
-            --stranded no
+            --stranded no \
             --sortByPos
 
         mv {params.project}_DESeq_TE_results.txt   {output.te_res}
