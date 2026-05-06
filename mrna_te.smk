@@ -370,10 +370,10 @@ rule tetranscripts:
         gene_res="results/tetranscripts/mrna/lepto_mrna_DESeq_gene_results.txt",
     container:
         tetranscripts
-    threads: 8
+    threads: 16
     resources:
-        mem_mb=32000,
-        runtime=240,
+        mem_mb=64000,
+        runtime=720,
     params:
         outdir="results/tetranscripts/mrna",
         project="lepto_mrna",
