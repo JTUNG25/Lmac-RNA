@@ -620,8 +620,8 @@ rule tetranscripts_batch3a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch3a/lepto_batch3_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch3a/lepto_batch3_DESeq_gene_results.txt",
+        te_res="results/tetranscripts/batch3a/lepto_batch3a_DESeq_TE_results.txt",
+        gene_res="results/tetranscripts/batch3a/lepto_batch3a_DESeq_gene_results.txt",
     container:
         tetranscripts
     threads: 16
@@ -629,8 +629,8 @@ rule tetranscripts_batch3a:
         mem_mb=64000,
         runtime=720, 
     params:
-        outdir="results/tetranscripts/batch3",
-        project="lepto_batch3",
+        outdir="results/tetranscripts/batch3a",
+        project="lepto_batch3a",
     shell:
         """
         TEtranscripts \
@@ -664,8 +664,8 @@ rule tetranscripts_batch3b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch3b/lepto_batch3_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch3b/lepto_batch3_DESeq_gene_results.txt",
+        te_res="results/tetranscripts/batch3b/lepto_batch3b_DESeq_TE_results.txt",
+        gene_res="results/tetranscripts/batch3b/lepto_batch3b_DESeq_gene_results.txt",
     container:
         tetranscripts
     threads: 16
@@ -673,8 +673,8 @@ rule tetranscripts_batch3b:
         mem_mb=64000,
         runtime=720, 
     params:
-        outdir="results/tetranscripts/batch3",
-        project="lepto_batch3",
+        outdir="results/tetranscripts/batch3b",
+        project="lepto_batch3b",
     shell:
         """
         TEtranscripts \
