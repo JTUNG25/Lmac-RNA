@@ -608,7 +608,7 @@ rule tetranscripts_batch2c:
         """
 
 
-# BATCH 3A: R genes R1 + D5-7 control
+# BATCH 3A: R1 + D5-7 control
 rule tetranscripts_batch3a:
     input:
         treatment_bams=expand(
@@ -627,7 +627,7 @@ rule tetranscripts_batch3a:
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=720, 
+        runtime=360, 
     params:
         outdir="results/tetranscripts/batch3a",
         project="lepto_batch3a",
@@ -758,7 +758,7 @@ rule tetranscripts_batch4b:
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=720, 
+        runtime=1440, 
     params:
         outdir="results/tetranscripts/batch4b",
         project="lepto_batch4b",
