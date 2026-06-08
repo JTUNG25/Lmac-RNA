@@ -9,26 +9,6 @@ multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 TRANSCRIPTOME = "data/reference/JN3_transcript_clean.fa"
 
 SAMPLES = [
-    "A13-1-1",
-    "A13-1-2",
-    "A13-1-3",
-    "A13-2-1",
-    "A13-2-2",
-    "A13-2-3",
-    "R12-1-1",
-    "R12-1-2",
-    "R12-1-3",
-    "R12-2-1",
-    "R12-2-2",
-    "R12-2-3",
-    "R12-3-1",
-    "R12-3-2",
-    "R12-3-3",
-    # dKO Batch WT
-    "WT-1-1",
-    "WT-1-2",
-    "WT-1-3",
-    # last sKOs
     "A2-1-1",
     "A2-1-2",
     "A2-1-3",
@@ -91,8 +71,8 @@ rule kallisto_index:
 # ── Adapter trimming and QC with fastp ───────────────────────────────────────
 rule fastp:
     input:
-        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
-        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
+        r1="merged_raw/{sample}_R1.fastq.gz",
+        r2="merged_raw/{sample}_R2.fastq.gz",
     output:
         r1="results/fastp/{sample}_R1.fastq.gz",
         r2="results/fastp/{sample}_R2.fastq.gz",
