@@ -10,22 +10,24 @@ GENOME = "data/genome/JN3.fasta"
 GTF = "data/genome/JN3.gtf"
 
 
-(all_samples,) = glob_wildcards("raw_data_2/merged/{sample}_R1.fastq.gz")
-SAMPLES = all_samples
+REPLICATES = ["1", "2", "3"]
+SAMPLES = [f"{mutant}-{rep}" for mutant in MUTANTS for rep in REPLICATES]
 
 MUTANTS = [
-    "A13-1",
-    "A13-2",
-    "R12-1",
-    "R12-2",
-    "R12-3",
-    "WT-1",  
+    "A2-1",
+    "A2-2",
+    "A2-3"
+    "R3-1",
+    "R3-2",
+    "R3-3",
+    "R1-2",
+    "WT-2",  
 ]
 
 
-# Helper function to get samples for each mutant
+# Helper function to get replicate samples for a given mutant/condition
 def get_replicates(mutant):
-    return [s for s in SAMPLES if s.startswith(mutant + "-") or s == mutant]
+    return [f"{mutant}-{rep}" for rep in REPLICATES]
 
 
 rule target:
@@ -42,8 +44,8 @@ rule target:
 
 rule fastqc:
     input:
-        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
-        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
+        r1="merged_raw/{sample}_R1.fastq.gz",
+        r2="merged_raw/{sample}_R2.fastq.gz",
     output:
         r1_html="results/fastqc/{sample}_R1_fastqc.html",
         r1_zip="results/fastqc/{sample}_R1_fastqc.zip",
@@ -102,8 +104,8 @@ rule build_hisat2_index_with_ss:
 
 rule hisat2_align:
     input:
-        r1="raw_data_2/merged/{sample}_R1.fastq.gz",
-        r2="raw_data_2/merged/{sample}_R2.fastq.gz",
+        r1="merged_raw/{sample}_R1.fastq.gz",
+        r2="merged_raw/{sample}_R2.fastq.gz",
         idx=expand("reference/hisat2_index/genome_ss.{i}.ht2", i=range(1, 9)),
     output:
         sam=temp("results/hisat2/{sample}.sam"),
@@ -194,7 +196,6 @@ rule merge_bams:
         """
 
 
-# Generate alignment statistics
 rule alignment_stats:
     input:
         "results/hisat2/{sample}.sorted.bam",
