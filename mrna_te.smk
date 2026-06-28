@@ -89,6 +89,31 @@ BATCH4B_TREATMENT = [
     "R12-3-3",
 ]
 
+BATCH5_CONTROL = ["WT-2-1", "WT-2-2", "WT-2-3"]
+BATCH5_TREATMENT = [
+    "R3-1-1",
+    "R3-1-2",
+    "R3-1-3",
+    "R3-2-1",
+    "R3-2-2",
+    "R3-2-3",
+    "R3-3-1",
+    "R3-3-2",
+    "R3-3-3",
+    "R1-2-1",
+    "R1-2-2",
+    "R1-2-3",
+    "A2-1-1",
+    "A2-1-2",
+    "A2-1-3",
+    "A2-2-1",
+    "A2-2-2",
+    "A2-2-3",
+    "A2-3-1",
+    "A2-3-2",
+    "A2-3-3",
+]
+
 GENOME = "data/genome/JN3.fasta"
 GENOME_NAME = "JN3"
 GENOME_SM = "data/genome/JN3.masked.fasta"
