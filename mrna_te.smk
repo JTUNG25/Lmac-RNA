@@ -146,7 +146,7 @@ rule all:
         "results/tetranscripts/batch3b/lepto_batch3b_DESeq_TE_results.txt",
         "results/tetranscripts/batch4a/lepto_batch4a_DESeq_TE_results.txt",
         "results/tetranscripts/batch4b/lepto_batch4b_DESeq_TE_results.txt",
-        "results/tetranscripts/batch4b/lepto_batch5_DESeq_TE_results.txt",
+        "results/tetranscripts/batch5/lepto_batch5_DESeq_TE_results.txt",
 
 
 # ══════════════════════════════════════════════════════════════════════════════
