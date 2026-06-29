@@ -807,3 +807,46 @@ rule tetranscripts_batch4b:
         mv {params.project}_DESeq_TE_results.txt   {output.te_res}
         mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
+
+# BATCH 5: R3, R1-2, A2 genes + WT-2 control
+rule tetranscripts_batch5:
+    input:
+        treatment_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_TREATMENT
+        ),
+        control_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_CONTROL
+        ),
+        gene_gtf=GENE_GTF,
+        te_gtf=TE_GTF,
+    output:
+        te_res="results/tetranscripts/batch5/lepto_batch5_DESeq_TE_results.txt",
+        gene_res="results/tetranscripts/batch5/lepto_batch5_DESeq_gene_results.txt",
+    container:
+        tetranscripts
+    threads: 16
+    resources:
+        mem_mb=64000,
+        runtime=1440,
+    params:
+        outdir="results/tetranscripts/batch5",
+        project="lepto_batch5",
+    shell:
+        """
+        TEtranscripts \
+            -t {input.treatment_bams} \
+            -c {input.control_bams} \
+            --GTF {input.gene_gtf} \
+            --TE {input.te_gtf} \
+            --project {params.project} \
+            --mode multi \
+            --padj 0.05 \
+            --minread 1 \
+            --norm DESeq_default \
+            --DESeq \
+            --stranded no \
+            --sortByPos
+
+        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
+        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
+        """
