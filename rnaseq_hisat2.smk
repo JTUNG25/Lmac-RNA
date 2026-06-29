@@ -17,11 +17,12 @@ MUTANTS = [
     "R3-2",
     "R3-3",
     "R1-2",
-    "WT-2",  
+    "WT-2",
 ]
 
 REPLICATES = ["1", "2", "3"]
 SAMPLES = [f"{mutant}-{rep}" for mutant in MUTANTS for rep in REPLICATES]
+
 
 # Helper function to get replicate samples for a given mutant/condition
 def get_replicates(mutant):
@@ -37,7 +38,7 @@ rule target:
         expand("results/hisat2/{sample}.sorted.bam.bai", sample=SAMPLES),
         expand("results/stats/{sample}.alignment_stats.txt", sample=SAMPLES),
         "results/stats/alignment_summary.txt",
-        expand("results/merged/{condition}.merged.sorted.bam", condition=MUTANTS)
+        expand("results/merged/{condition}.merged.sorted.bam", condition=MUTANTS),
 
 
 rule fastqc:
@@ -87,11 +88,11 @@ rule build_hisat2_index_with_ss:
     shell:
         """
         mkdir -p reference/hisat2_index
-        
+
         # Extract splice sites and exons
-        hisat2_extract_splice_sites.py {input.gtf} > {output.ss}
-        hisat2_extract_exons.py {input.gtf} > {output.exon}
-        
+        hisat2_extract_splice_sites.py {input.gtf} >{output.ss}
+        hisat2_extract_exons.py {input.gtf} >{output.exon}
+
         # Build index with splice site information
         hisat2-build -p {threads} \
             --ss {output.ss} \
@@ -115,13 +116,16 @@ rule hisat2_align:
     threads: 8
     resources:
         mem_mb=32000,
-        runtime=180,
+        runtime=240,  # bump to 4 hours as well
     params:
         index_prefix="reference/hisat2_index/genome_ss",
         rg_id="{sample}",
         rg_sm="{sample}",
     shell:
         """
+        export TMPDIR=${{SCRATCH}}/hisat2_tmp_{wildcards.sample}
+        mkdir -p $TMPDIR
+
         hisat2 -p {threads} \
             -x {params.index_prefix} \
             -1 {input.r1} -2 {input.r2} \
@@ -212,15 +216,15 @@ rule alignment_stats:
     shell:
         """
         mkdir -p results/stats
-        
+
         # Basic statistics
-        samtools stats {input} > {output.stats}
-        
+        samtools stats {input} >{output.stats}
+
         # Flag statistics
-        samtools flagstat {input} > {output.flagstat}
-        
+        samtools flagstat {input} >{output.flagstat}
+
         # Index statistics
-        samtools idxstats {input} > {output.idxstats}
+        samtools idxstats {input} >{output.idxstats}
         """
 
 
@@ -241,24 +245,19 @@ rule aggregate_stats:
             out.write(
                 "Sample\tTotal_reads\tMapped_reads\tMapping_rate\tProperly_paired\n"
             )
-
             for sample in SAMPLES:
                 flagstat_file = f"results/stats/{sample}.flagstat.txt"
-
                 with open(flagstat_file, "r") as f:
                     lines = f.readlines()
-
                 # Parse flagstat output
                 total_reads = lines[0].split()[0]
                 mapped_line = [l for l in lines if "mapped (" in l][0]
                 mapped_reads = mapped_line.split()[0]
                 mapping_rate = mapped_line.split("(")[1].split("%")[0]
-
                 properly_paired_line = [l for l in lines if "properly paired" in l][
                     0
                 ]
                 properly_paired = properly_paired_line.split("(")[1].split("%")[0]
-
                 out.write(
                     f"{sample}\t{total_reads}\t{mapped_reads}\t{mapping_rate}%\t{properly_paired}%\n"
                 )
