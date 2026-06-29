@@ -9,14 +9,10 @@ samtools = "docker://quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0"
 GENOME = "data/genome/JN3.fasta"
 GTF = "data/genome/JN3.gtf"
 
-
-REPLICATES = ["1", "2", "3"]
-SAMPLES = [f"{mutant}-{rep}" for mutant in MUTANTS for rep in REPLICATES]
-
 MUTANTS = [
     "A2-1",
     "A2-2",
-    "A2-3"
+    "A2-3",
     "R3-1",
     "R3-2",
     "R3-3",
@@ -24,6 +20,9 @@ MUTANTS = [
     "WT-2",  
 ]
 
+
+REPLICATES = ["1", "2", "3"]
+SAMPLES = [f"{mutant}-{rep}" for mutant in MUTANTS for rep in REPLICATES]
 
 # Helper function to get replicate samples for a given mutant/condition
 def get_replicates(mutant):
