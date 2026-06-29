@@ -20,7 +20,6 @@ MUTANTS = [
     "WT-2",  
 ]
 
-
 REPLICATES = ["1", "2", "3"]
 SAMPLES = [f"{mutant}-{rep}" for mutant in MUTANTS for rep in REPLICATES]
 
