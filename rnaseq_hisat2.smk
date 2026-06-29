@@ -116,15 +116,17 @@ rule hisat2_align:
     threads: 8
     resources:
         mem_mb=32000,
-        runtime=240,  # bump to 4 hours as well
+        runtime=240,
     params:
         index_prefix="reference/hisat2_index/genome_ss",
         rg_id="{sample}",
         rg_sm="{sample}",
     shell:
         """
-        export TMPDIR=${{SCRATCH}}/hisat2_tmp_{wildcards.sample}
-        mkdir -p $TMPDIR
+        # Use absolute path to scratch (not ${SCRATCH} which isn't in container)
+        TMPDIR_PATH="/QRISdata/Q9141/lmac_rna/tmp/hisat2_{wildcards.sample}"
+        mkdir -p "$TMPDIR_PATH"
+        export TMPDIR="$TMPDIR_PATH"
 
         hisat2 -p {threads} \
             -x {params.index_prefix} \
