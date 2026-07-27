@@ -423,8 +423,10 @@ rule star_align_mrna:
         runtime=240,
     params:
         prefix="results/star/{sample}/",
+        tmpdir="/scratch/temp/star_{sample}_tmp",
     shell:
         """
+        rm -rf {params.tmpdir}
         STAR --runMode alignReads \
             --genomeDir {input.index} \
             --readFilesIn {input.r1} {input.r2} \
@@ -437,7 +439,7 @@ rule star_align_mrna:
             --winAnchorMultimapNmax 200 \
             --alignSoftClipAtReferenceEnds No \
             --limitBAMsortRAM 10000000000 \
-            --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
+            --outTmpDir {params.tmpdir} \
             --outFileNamePrefix {params.prefix} \
             --runThreadN {threads}
         """
