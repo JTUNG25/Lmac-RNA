@@ -157,6 +157,7 @@ rule featurecounts_subfamily_pilot:
             -g gene_id \
             -t exon \
             -p \
+            --countReadPairs \
             -T {threads} \
             {input.bams}
         """

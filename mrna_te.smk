@@ -142,15 +142,17 @@ rule all:
             sample=MRNA_SAMPLES,
         ),
         # TEtranscripts outputs
-        "results/tetranscripts/batch1/lepto_batch1_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch2a/lepto_batch2a_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch2b/lepto_batch2b_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch2c/lepto_batch2c_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch3a/lepto_batch3a_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch3b/lepto_batch3b_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch4a/lepto_batch4a_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch4b/lepto_batch4b_DESeq_TEtranscript_results.txt",
-        "results/tetranscripts/batch5/lepto_batch5_DESeq_TEtranscript_results.txt",
+        "lepto_batch1_DESeq_TEtranscript_results.txt",
+        "lepto_batch2a_DESeq_TEtranscript_results.txt",
+        "lepto_batch2b_DESeq_TEtranscript_results.txt",
+        "lepto_batch2c_DESeq_TEtranscript_results.txt",
+        "lepto_batch3a_DESeq_TEtranscript_results.txt",
+        "lepto_batch3b_DESeq_TEtranscript_results.txt",
+        "lepto_batch4a_DESeq_TEtranscript_results.txt",
+        "lepto_batch4b_DESeq_TEtranscript_results.txt",
+        "lepto_batch5a_DESeq_TEtranscript_results.txt",
+        "lepto_batch5b_DESeq_TEtranscript_results.txt",
+        "lepto_batch5c_DESeq_TEtranscript_results.txt",
 
 
 # ══════════════════════════════════════════════════════════════════════════════
