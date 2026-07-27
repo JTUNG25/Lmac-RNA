@@ -461,6 +461,10 @@ rule samtools_index:
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 3 — TEtranscripts DE (genes + TEs jointly)
 # Separated by batch and mutant type for proper DESeq normalization
+#
+# NOTE: every rule below now defines params.project matching its output
+# filename, and every shell command passes --project {params.project} to
+# TEtranscripts so the produced file actually matches what `rule all` expects.
 # ══════════════════════════════════════════════════════════════════════════════
 
 
@@ -483,6 +487,8 @@ rule tetranscripts_batch1:
     resources:
         mem_mb=64000,
         runtime=480,
+    params:
+        project="lepto_batch1",
     shell:
         """
         TEtranscripts \
@@ -490,6 +496,7 @@ rule tetranscripts_batch1:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
+            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -520,7 +527,7 @@ rule tetranscripts_batch2a:
         mem_mb=64000,
         runtime=480,
     params:
-        outdir="results/tetranscripts/batch2a",
+        project="lepto_batch2a",
     shell:
         """
         TEtranscripts \
@@ -528,6 +535,7 @@ rule tetranscripts_batch2a:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
+            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -557,6 +565,8 @@ rule tetranscripts_batch2b:
     resources:
         mem_mb=64000,
         runtime=360,
+    params:
+        project="lepto_batch2b",
     shell:
         """
         TEtranscripts \
@@ -564,6 +574,7 @@ rule tetranscripts_batch2b:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
+            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -593,6 +604,8 @@ rule tetranscripts_batch2c:
     resources:
         mem_mb=64000,
         runtime=360,
+    params:
+        project="lepto_batch2c",
     shell:
         """
         TEtranscripts \
@@ -631,7 +644,6 @@ rule tetranscripts_batch3a:
         mem_mb=64000,
         runtime=360,
     params:
-        outdir="results/tetranscripts/batch3a",
         project="lepto_batch3a",
     shell:
         """
@@ -640,6 +652,7 @@ rule tetranscripts_batch3a:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
+            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -650,7 +663,7 @@ rule tetranscripts_batch3a:
         """
 
 
-# BATCH 3B: R2-2, R2-3, R2-4, R2-5) + D5-7 control
+# BATCH 3B: R2-2, R2-3, R2-4, R2-5 + D5-7 control
 rule tetranscripts_batch3b:
     input:
         treatment_bams=expand(
@@ -669,6 +682,8 @@ rule tetranscripts_batch3b:
     resources:
         mem_mb=64000,
         runtime=720,
+    params:
+        project="lepto_batch3b",
     shell:
         """
         TEtranscripts \
@@ -676,6 +691,7 @@ rule tetranscripts_batch3b:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
+            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -705,6 +721,8 @@ rule tetranscripts_batch4a:
     resources:
         mem_mb=64000,
         runtime=480,
+    params:
+        project="lepto_batch4a",
     shell:
         """
         TEtranscripts \
@@ -742,6 +760,8 @@ rule tetranscripts_batch4b:
     resources:
         mem_mb=64000,
         runtime=1440,
+    params:
+        project="lepto_batch4b",
     shell:
         """
         TEtranscripts \
@@ -760,7 +780,7 @@ rule tetranscripts_batch4b:
         """
 
 
-# BATCH 5a: R3 + WT-2 control
+# BATCH 5A: R3 + WT-2 control
 rule tetranscripts_batch5a:
     input:
         treatment_bams=expand(
@@ -779,6 +799,8 @@ rule tetranscripts_batch5a:
     resources:
         mem_mb=64000,
         runtime=1440,
+    params:
+        project="lepto_batch5a",
     shell:
         """
         TEtranscripts \
@@ -797,7 +819,7 @@ rule tetranscripts_batch5a:
         """
 
 
-# BATCH 5b: R1-2 + WT-2 control
+# BATCH 5B: R1-2 + WT-2 control
 rule tetranscripts_batch5b:
     input:
         treatment_bams=expand(
@@ -816,6 +838,8 @@ rule tetranscripts_batch5b:
     resources:
         mem_mb=64000,
         runtime=1440,
+    params:
+        project="lepto_batch5b",
     shell:
         """
         TEtranscripts \
@@ -834,7 +858,7 @@ rule tetranscripts_batch5b:
         """
 
 
-# BATCH 5c: A2 genes + WT-2 control
+# BATCH 5C: A2 genes + WT-2 control
 rule tetranscripts_batch5c:
     input:
         treatment_bams=expand(
@@ -853,6 +877,8 @@ rule tetranscripts_batch5c:
     resources:
         mem_mb=64000,
         runtime=1440,
+    params:
+        project="lepto_batch5c",
     shell:
         """
         TEtranscripts \
