@@ -142,17 +142,17 @@ rule all:
             sample=MRNA_SAMPLES,
         ),
         # TEtranscripts outputs
-        "lepto_batch1_DESeq_TEtranscript_results.txt",
-        "lepto_batch2a_DESeq_TEtranscript_results.txt",
-        "lepto_batch2b_DESeq_TEtranscript_results.txt",
-        "lepto_batch2c_DESeq_TEtranscript_results.txt",
-        "lepto_batch3a_DESeq_TEtranscript_results.txt",
-        "lepto_batch3b_DESeq_TEtranscript_results.txt",
-        "lepto_batch4a_DESeq_TEtranscript_results.txt",
-        "lepto_batch4b_DESeq_TEtranscript_results.txt",
-        "lepto_batch5a_DESeq_TEtranscript_results.txt",
-        "lepto_batch5b_DESeq_TEtranscript_results.txt",
-        "lepto_batch5c_DESeq_TEtranscript_results.txt",
+        "lepto_batch1_gene_TE_analysis.txt",
+        "lepto_batch2a_gene_TE_analysis.txt",
+        "lepto_batch2b_gene_TE_analysis.txt",
+        "lepto_batch2c_gene_TE_analysis.txt",
+        "lepto_batch3a_gene_TE_analysis.txt",
+        "lepto_batch3b_gene_TE_analysis.txt",
+        "lepto_batch4a_gene_TE_analysis.txt",
+        "lepto_batch4b_gene_TE_analysis.txt",
+        "lepto_batch5a_gene_TE_analysis.txt",
+        "lepto_batch5b_gene_TE_analysis.txt",
+        "lepto_batch5c_gene_TE_analysis.txt",
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -480,7 +480,7 @@ rule tetranscripts_batch1:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch1_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch1_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -519,7 +519,7 @@ rule tetranscripts_batch2a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch2a_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch2a_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -558,7 +558,7 @@ rule tetranscripts_batch2b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch2b_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch2b_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -597,7 +597,7 @@ rule tetranscripts_batch2c:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch2c_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch2c_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -636,7 +636,7 @@ rule tetranscripts_batch3a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch3a_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch3a_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -675,7 +675,7 @@ rule tetranscripts_batch3b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch3b_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch3b_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -714,7 +714,7 @@ rule tetranscripts_batch4a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch4a_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch4a_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -753,7 +753,7 @@ rule tetranscripts_batch4b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch4b_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch4b_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -792,7 +792,7 @@ rule tetranscripts_batch5a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch5a_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch5a_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -831,7 +831,7 @@ rule tetranscripts_batch5b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch5b_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch5b_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16
@@ -870,7 +870,7 @@ rule tetranscripts_batch5c:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="lepto_batch5c_DESeq_TEtranscript_results.txt",
+        te_res="lepto_batch5c_gene_TE_analysis.txt",
     container:
         tetranscripts
     threads: 16

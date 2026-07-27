@@ -2,7 +2,7 @@
 #SBATCH --account=a_qaafi_chs
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=64GB         
+#SBATCH --mem=16GB         
 #SBATCH --time=24:00:00
 #SBATCH --job-name=mrna_te
 #SBATCH --output=sm.log
