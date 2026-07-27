@@ -90,7 +90,7 @@ BATCH4B_TREATMENT = [
 ]
 
 BATCH5_CONTROL = ["WT-2-1", "WT-2-2", "WT-2-3"]
-BATCH5_TREATMENT = [
+BATCH5A_TREATMENT = [
     "R3-1-1",
     "R3-1-2",
     "R3-1-3",
@@ -100,9 +100,13 @@ BATCH5_TREATMENT = [
     "R3-3-1",
     "R3-3-2",
     "R3-3-3",
+]
+BATCH5B_TREATMENT = [
     "R1-2-1",
     "R1-2-2",
     "R1-2-3",
+]
+BATCH5C_TREATMENT = [
     "A2-1-1",
     "A2-1-2",
     "A2-1-3",
@@ -138,15 +142,15 @@ rule all:
             sample=MRNA_SAMPLES,
         ),
         # TEtranscripts outputs
-        "results/tetranscripts/batch1/lepto_batch1_DESeq_TE_results.txt",
-        "results/tetranscripts/batch2a/lepto_batch2a_DESeq_TE_results.txt",
-        "results/tetranscripts/batch2b/lepto_batch2b_DESeq_TE_results.txt",
-        "results/tetranscripts/batch2c/lepto_batch2c_DESeq_TE_results.txt",
-        "results/tetranscripts/batch3a/lepto_batch3a_DESeq_TE_results.txt",
-        "results/tetranscripts/batch3b/lepto_batch3b_DESeq_TE_results.txt",
-        "results/tetranscripts/batch4a/lepto_batch4a_DESeq_TE_results.txt",
-        "results/tetranscripts/batch4b/lepto_batch4b_DESeq_TE_results.txt",
-        "results/tetranscripts/batch5/lepto_batch5_DESeq_TE_results.txt",
+        "results/tetranscripts/batch1/lepto_batch1_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch2a/lepto_batch2a_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch2b/lepto_batch2b_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch2c/lepto_batch2c_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch3a/lepto_batch3a_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch3b/lepto_batch3b_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch4a/lepto_batch4a_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch4b/lepto_batch4b_DESeq_TEtranscript_results.txt",
+        "results/tetranscripts/batch5/lepto_batch5_DESeq_TEtranscript_results.txt",
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -209,10 +213,10 @@ rule repeatmodeler_run:
 
 rule repeatmasker_align:
     """
-Run RepeatMasker alignments only (-nopost skips post-processing).
-Output is JN3.fasta.cat.gz — the alignment archive.
-Runs on local scratch to avoid NFS I/O bottleneck.
-"""
+    Run RepeatMasker alignments only (-nopost skips post-processing).
+    Output is JN3.fasta.cat.gz — the alignment archive.
+    Runs on local scratch to avoid NFS I/O bottleneck.
+    """
     input:
         genome=GENOME,
         lib="results/repeatmodeler/JN3-families.fa",
@@ -234,22 +238,22 @@ Runs on local scratch to avoid NFS I/O bottleneck.
         mkdir -p $SCRATCH_DIR
 
         RepeatMasker \
-            -lib    {input.lib} \
+            -lib {input.lib} \
             -gff \
-            -pa     6 \
-            -dir    $SCRATCH_DIR \
+            -pa 6 \
+            -dir $SCRATCH_DIR \
             {input.genome}
 
         mv $SCRATCH_DIR/JN3.fasta.cat.gz {output.cat}
-        mv $SCRATCH_DIR/JN3.fasta.out    {output.out}
+        mv $SCRATCH_DIR/JN3.fasta.out {output.out}
         mv $SCRATCH_DIR/JN3.fasta.out.gff {output.gff}
         """
 
 
 rule repeatmasker_postprocess:
     """
-Generate soft-masked genome from existing RepeatMasker .out file.
-"""
+    Generate soft-masked genome from existing RepeatMasker .out file.
+    """
     input:
         genome=GENOME,
         out="results/repeatmasker/JN3.fasta.out",
@@ -267,12 +271,12 @@ Generate soft-masked genome from existing RepeatMasker .out file.
         # columns: score div del ins query start end left strand repeat class start end left id
         tail -n +4 {input.out} | awk '{{
             print $5 "\t" ($6-1) "\t" $7
-        }}' > /tmp/repeats_$SLURM_JOB_ID.bed
+        }}' >/tmp/repeats_$SLURM_JOB_ID.bed
 
         bedtools maskfasta \
-            -fi   {input.genome} \
-            -bed  /tmp/repeats_$SLURM_JOB_ID.bed \
-            -fo   {output.masked} \
+            -fi {input.genome} \
+            -bed /tmp/repeats_$SLURM_JOB_ID.bed \
+            -fo {output.masked} \
             -soft
 
         rm /tmp/repeats_$SLURM_JOB_ID.bed
@@ -281,10 +285,10 @@ Generate soft-masked genome from existing RepeatMasker .out file.
 
 rule make_te_gtf:
     """
-RepeatMasker GFF → GTF for TEtranscripts.
-Parses repeat name, class, family from RepeatMasker .out and .out.gff files.
-TEtranscripts requires: gene_id, transcript_id, family_id, class_id
-"""
+    RepeatMasker GFF → GTF for TEtranscripts.
+    Parses repeat name, class, family from RepeatMasker .out and .out.gff files.
+    TEtranscripts requires: gene_id, transcript_id, family_id, class_id
+    """
     input:
         gff="results/repeatmasker/JN3.fasta.out.gff",
         out="results/repeatmasker/JN3.fasta.out",
@@ -308,7 +312,7 @@ TEtranscripts requires: gene_id, transcript_id, family_id, class_id
             class  = cf[1]
             family = cf[2] ? cf[2] : cf[1]
             print $10, class, family
-        }}' | sort -u > $SCRATCH_DIR/te_class.txt
+        }}' | sort -u >$SCRATCH_DIR/te_class.txt
 
         # ── clean GFF3 with unique IDs ─────────────────────────────────────
         grep -v "^#" {input.gff} | awk '
@@ -320,7 +324,7 @@ TEtranscripts requires: gene_id, transcript_id, family_id, class_id
             locus = $1 "_" $4 "_" $5
             print $1,$2,$3,$4,$5,$6,$7,$8,
                   "ID=" locus ";Name=" name ";family=" name
-        }}' > $SCRATCH_DIR/te.gff3
+        }}' >$SCRATCH_DIR/te.gff3
 
         # ── convert to TEtranscripts-compatible GTF ────────────────────────
         grep -v "^#" {input.gff} | awk -v classfile=$SCRATCH_DIR/te_class.txt '
@@ -343,7 +347,7 @@ TEtranscripts requires: gene_id, transcript_id, family_id, class_id
                   "transcript_id \"" locus "\"; " \
                   "family_id \"" family "\"; " \
                   "class_id \"" class "\";"
-        }}' > $SCRATCH_DIR/te.gtf
+        }}' >$SCRATCH_DIR/te.gtf
 
         # ── BED for sRNA ───────────────────────────────────────────────────
         grep -v "^#" $SCRATCH_DIR/te.gff3 | awk '
@@ -352,12 +356,12 @@ TEtranscripts requires: gene_id, transcript_id, family_id, class_id
             match($9, /ID=([^;]+)/,     id_arr)
             match($9, /family=([^;]+)/, fam_arr)
             print $1, ($4-1), $5, id_arr[1] ";" fam_arr[1], 0, $7
-        }}' | sort -k1,1 -k2,2n > $SCRATCH_DIR/te.bed
+        }}' | sort -k1,1 -k2,2n >$SCRATCH_DIR/te.bed
 
         # ── copy to NFS only at the end ────────────────────────────────────
         cp $SCRATCH_DIR/te.gff3 {output.gff}
-        cp $SCRATCH_DIR/te.gtf  {output.gtf}
-        cp $SCRATCH_DIR/te.bed  {output.bed}
+        cp $SCRATCH_DIR/te.gtf {output.gtf}
+        cp $SCRATCH_DIR/te.bed {output.bed}
 
         rm -rf $SCRATCH_DIR
         """
@@ -370,10 +374,10 @@ TEtranscripts requires: gene_id, transcript_id, family_id, class_id
 
 rule star_index:
     """
-Build index on soft-masked genome.
-genomeSAindexNbases: use 11 for ~40 Mb fungal genomes,
-increase to 13 for larger assemblies (STAR will warn if wrong).
-"""
+    Build index on soft-masked genome.
+    genomeSAindexNbases: use 11 for ~40 Mb fungal genomes,
+    increase to 13 for larger assemblies (STAR will warn if wrong).
+    """
     input:
         genome=GENOME_SM,
     output:
@@ -387,21 +391,21 @@ increase to 13 for larger assemblies (STAR will warn if wrong).
     shell:
         """
         STAR --runMode genomeGenerate \
-             --genomeDir {output.index} \
-             --genomeFastaFiles {input.genome} \
-             --genomeSAindexNbases 11 \
-             --runThreadN {threads}
+            --genomeDir {output.index} \
+            --genomeFastaFiles {input.genome} \
+            --genomeSAindexNbases 11 \
+            --runThreadN {threads}
         """
 
 
 rule star_align_mrna:
     """
-Key flags for TE analysis:
-  --outSAMmultNmax -1         → report ALL multi-mapping alignments
-  --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
-  --winAnchorMultimapNmax 200 → needed when multNmax is high
-TEtranscripts EM uses these to redistribute counts probabilistically.
-"""
+    Key flags for TE analysis:
+      --outSAMmultNmax -1         → report ALL multi-mapping alignments
+      --outFilterMultimapNmax 100 → keep reads mapping up to 100 loci
+      --winAnchorMultimapNmax 200 → needed when multNmax is high
+    TEtranscripts EM uses these to redistribute counts probabilistically.
+    """
     input:
         r1="data/fastp/{sample}_R1.fastq.gz",
         r2="data/fastp/{sample}_R2.fastq.gz",
@@ -420,20 +424,20 @@ TEtranscripts EM uses these to redistribute counts probabilistically.
     shell:
         """
         STAR --runMode alignReads \
-             --genomeDir {input.index} \
-             --readFilesIn {input.r1} {input.r2} \
-             --readFilesCommand zcat \
-             --outSAMtype BAM SortedByCoordinate \
-             --outSAMstrandField intronMotif \
-             --outSAMattributes NH HI AS NM \
-             --outSAMmultNmax -1 \
-             --outFilterMultimapNmax 100 \
-             --winAnchorMultimapNmax 200 \
-             --alignSoftClipAtReferenceEnds No \
-             --limitBAMsortRAM 10000000000 \
-             --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
-             --outFileNamePrefix {params.prefix} \
-             --runThreadN {threads}
+            --genomeDir {input.index} \
+            --readFilesIn {input.r1} {input.r2} \
+            --readFilesCommand zcat \
+            --outSAMtype BAM SortedByCoordinate \
+            --outSAMstrandField intronMotif \
+            --outSAMattributes NH HI AS NM \
+            --outSAMmultNmax -1 \
+            --outFilterMultimapNmax 100 \
+            --winAnchorMultimapNmax 200 \
+            --alignSoftClipAtReferenceEnds No \
+            --limitBAMsortRAM 10000000000 \
+            --outTmpDir /scratch/temp/$SLURM_JOB_ID/star_{wildcards.sample} \
+            --outFileNamePrefix {params.prefix} \
+            --runThreadN {threads}
         """
 
 
@@ -470,17 +474,13 @@ rule tetranscripts_batch1:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch1/lepto_batch1_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch1/lepto_batch1_DESeq_gene_results.txt",
+        te_res="lepto_batch1_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=480, 
-    params:
-        outdir="results/tetranscripts/batch1",
-        project="lepto_batch1",
+        runtime=480,
     shell:
         """
         TEtranscripts \
@@ -488,7 +488,6 @@ rule tetranscripts_batch1:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
-            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -496,9 +495,6 @@ rule tetranscripts_batch1:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -514,17 +510,15 @@ rule tetranscripts_batch2a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch2a/lepto_batch2a_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch2a/lepto_batch2a_DESeq_gene_results.txt",
+        te_res="lepto_batch2a_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=480, 
+        runtime=480,
     params:
         outdir="results/tetranscripts/batch2a",
-        project="lepto_batch2a",
     shell:
         """
         TEtranscripts \
@@ -532,7 +526,6 @@ rule tetranscripts_batch2a:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
-            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -540,9 +533,6 @@ rule tetranscripts_batch2a:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -558,17 +548,13 @@ rule tetranscripts_batch2b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch2b/lepto_batch2b_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch2b/lepto_batch2b_DESeq_gene_results.txt",
+        te_res="lepto_batch2b_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=360, 
-    params:
-        outdir="results/tetranscripts/batch2b",
-        project="lepto_batch2b",
+        runtime=360,
     shell:
         """
         TEtranscripts \
@@ -576,7 +562,6 @@ rule tetranscripts_batch2b:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
-            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -584,9 +569,6 @@ rule tetranscripts_batch2b:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -602,17 +584,13 @@ rule tetranscripts_batch2c:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch2c/lepto_batch2c_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch2c/lepto_batch2c_DESeq_gene_results.txt",
+        te_res="lepto_batch2c_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=360, 
-    params:
-        outdir="results/tetranscripts/batch2c",
-        project="lepto_batch2c",
+        runtime=360,
     shell:
         """
         TEtranscripts \
@@ -628,9 +606,6 @@ rule tetranscripts_batch2c:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -646,14 +621,13 @@ rule tetranscripts_batch3a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch3a/lepto_batch3a_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch3a/lepto_batch3a_DESeq_gene_results.txt",
+        te_res="lepto_batch3a_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=360, 
+        runtime=360,
     params:
         outdir="results/tetranscripts/batch3a",
         project="lepto_batch3a",
@@ -664,7 +638,6 @@ rule tetranscripts_batch3a:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
-            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -672,9 +645,6 @@ rule tetranscripts_batch3a:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -690,17 +660,13 @@ rule tetranscripts_batch3b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch3b/lepto_batch3b_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch3b/lepto_batch3b_DESeq_gene_results.txt",
+        te_res="lepto_batch3b_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=720, 
-    params:
-        outdir="results/tetranscripts/batch3b",
-        project="lepto_batch3b",
+        runtime=720,
     shell:
         """
         TEtranscripts \
@@ -708,7 +674,6 @@ rule tetranscripts_batch3b:
             -c {input.control_bams} \
             --GTF {input.gene_gtf} \
             --TE {input.te_gtf} \
-            --project {params.project} \
             --mode multi \
             --padj 0.05 \
             --minread 1 \
@@ -716,10 +681,8 @@ rule tetranscripts_batch3b:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
+
 
 # BATCH 4A: A13 genes (A13-1, A13-2) + WT-1 control
 rule tetranscripts_batch4a:
@@ -733,17 +696,13 @@ rule tetranscripts_batch4a:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch4a/lepto_batch4a_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch4a/lepto_batch4a_DESeq_gene_results.txt",
+        te_res="lepto_batch4a_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=480, 
-    params:
-        outdir="results/tetranscripts/batch4a",
-        project="lepto_batch4a",
+        runtime=480,
     shell:
         """
         TEtranscripts \
@@ -759,9 +718,6 @@ rule tetranscripts_batch4a:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
 
@@ -777,17 +733,13 @@ rule tetranscripts_batch4b:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch4b/lepto_batch4b_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch4b/lepto_batch4b_DESeq_gene_results.txt",
+        te_res="lepto_batch4b_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
-        runtime=1440, 
-    params:
-        outdir="results/tetranscripts/batch4b",
-        project="lepto_batch4b",
+        runtime=1440,
     shell:
         """
         TEtranscripts \
@@ -803,16 +755,14 @@ rule tetranscripts_batch4b:
             --DESeq \
             --stranded no \
             --sortByPos
-
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
         """
 
-# BATCH 5: R3, R1-2, A2 genes + WT-2 control
-rule tetranscripts_batch5:
+
+# BATCH 5a: R3 + WT-2 control
+rule tetranscripts_batch5a:
     input:
         treatment_bams=expand(
-            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_TREATMENT
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5A_TREATMENT
         ),
         control_bams=expand(
             "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_CONTROL
@@ -820,17 +770,13 @@ rule tetranscripts_batch5:
         gene_gtf=GENE_GTF,
         te_gtf=TE_GTF,
     output:
-        te_res="results/tetranscripts/batch5/lepto_batch5_DESeq_TE_results.txt",
-        gene_res="results/tetranscripts/batch5/lepto_batch5_DESeq_gene_results.txt",
+        te_res="lepto_batch5a_DESeq_TEtranscript_results.txt",
     container:
         tetranscripts
     threads: 16
     resources:
         mem_mb=64000,
         runtime=1440,
-    params:
-        outdir="results/tetranscripts/batch5",
-        project="lepto_batch5",
     shell:
         """
         TEtranscripts \
@@ -846,7 +792,78 @@ rule tetranscripts_batch5:
             --DESeq \
             --stranded no \
             --sortByPos
+        """
 
-        mv {params.project}_DESeq_TE_results.txt   {output.te_res}
-        mv {params.project}_DESeq_gene_results.txt {output.gene_res}
+
+# BATCH 5b: R1-2 + WT-2 control
+rule tetranscripts_batch5b:
+    input:
+        treatment_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5B_TREATMENT
+        ),
+        control_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_CONTROL
+        ),
+        gene_gtf=GENE_GTF,
+        te_gtf=TE_GTF,
+    output:
+        te_res="lepto_batch5b_DESeq_TEtranscript_results.txt",
+    container:
+        tetranscripts
+    threads: 16
+    resources:
+        mem_mb=64000,
+        runtime=1440,
+    shell:
+        """
+        TEtranscripts \
+            -t {input.treatment_bams} \
+            -c {input.control_bams} \
+            --GTF {input.gene_gtf} \
+            --TE {input.te_gtf} \
+            --project {params.project} \
+            --mode multi \
+            --padj 0.05 \
+            --minread 1 \
+            --norm DESeq_default \
+            --DESeq \
+            --stranded no \
+            --sortByPos
+        """
+
+
+# BATCH 5c: A2 genes + WT-2 control
+rule tetranscripts_batch5c:
+    input:
+        treatment_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5C_TREATMENT
+        ),
+        control_bams=expand(
+            "results/star/{s}/Aligned.sortedByCoord.out.bam", s=BATCH5_CONTROL
+        ),
+        gene_gtf=GENE_GTF,
+        te_gtf=TE_GTF,
+    output:
+        te_res="lepto_batch5c_DESeq_TEtranscript_results.txt",
+    container:
+        tetranscripts
+    threads: 16
+    resources:
+        mem_mb=64000,
+        runtime=1440,
+    shell:
+        """
+        TEtranscripts \
+            -t {input.treatment_bams} \
+            -c {input.control_bams} \
+            --GTF {input.gene_gtf} \
+            --TE {input.te_gtf} \
+            --project {params.project} \
+            --mode multi \
+            --padj 0.05 \
+            --minread 1 \
+            --norm DESeq_default \
+            --DESeq \
+            --stranded no \
+            --sortByPos
         """

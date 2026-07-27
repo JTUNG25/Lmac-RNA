@@ -123,7 +123,6 @@ rule hisat2_align:
         rg_sm="{sample}",
     shell:
         """
-        # Use absolute path to scratch (not ${SCRATCH} which isn't in container)
         TMPDIR_PATH="/QRISdata/Q9141/lmac_rna/tmp/hisat2_{wildcards.sample}"
         mkdir -p "$TMPDIR_PATH"
         export TMPDIR="$TMPDIR_PATH"
