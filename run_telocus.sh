@@ -17,6 +17,5 @@ mkdir -p $APPTAINER_TMPDIR $APPTAINER_CACHEDIR
 
 chmod +x profiles/bunya/status-sacct-robust.sh
 
-
 snakemake -s telocus_pilot.smk \
-    --profile profiles/bunya/ \
+    --profile profiles/bunya/ 
