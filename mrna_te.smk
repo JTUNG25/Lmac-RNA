@@ -9,8 +9,8 @@ bedtools = "/QRISdata/Q9141/lmac_rna/sifs/bedtools.sif"
 import os
 from pathlib import Path
 
-(_all_r1,) = glob_wildcards("data/fastp/{sample}_R1.fastq.gz")
-MRNA_SAMPLES = [s for s in _all_r1 if os.path.exists(f"data/fastp/{s}_R2.fastq.gz")]
+(_all_r1,) = glob_wildcards("results/fastp/{sample}_R1.fastq.gz")
+MRNA_SAMPLES = [s for s in _all_r1 if os.path.exists(f"results/fastp/{s}_R2.fastq.gz")]
 
 # ═════════════════════════
 # BATCH 1: D5-5 control
@@ -118,18 +118,21 @@ BATCH5C_TREATMENT = [
     "A2-3-3",
 ]
 
-GENOME = "data/genome/JN3.fasta"
-GENOME_NAME = "JN3"
-GENOME_SM = "data/genome/JN3.masked.fasta"
-TE_GFF = "data/genome/JN3.te.gff3"
-TE_GTF = "data/genome/JN3.te.gtf"
-TE_BED = "data/genome/JN3.te.bed"
-GENE_GTF = "data/genome/JN3.gtf"
+GENOME = "data/genomes/Lmac_D5_Final_renamed.fasta"
+GENOME_NAME = "D5"
+# RepeatMasker names its outputs after the *input fasta's basename*
+# (e.g. Lmac_D5_Final_renamed.fasta.out), not after GENOME_NAME.
+GENOME_BASENAME = os.path.basename(GENOME)
+GENOME_SM = "data/genomes/D5.masked.fasta"
+TE_GFF = "data/genomes/D5.te.gff3"
+TE_GTF = "data/genomes/D5.te.gtf"
+TE_BED = "data/genomes/D5.te.bed"
+GENE_GTF = "data/genomes/Lmac_D5_Final_renamed.gtf"
 
 
 rule all:
     input:
-        "results/repeatmodeler/JN3-families.fa",
+        "results/repeatmodeler/D5-families.fa",
         GENOME_SM,
         TE_GFF,
         TE_GTF,
@@ -164,7 +167,7 @@ rule repeatmodeler_build_db:
     input:
         GENOME,
     output:
-        "results/repeatmodeler/JN3_db.nhr",
+        "results/repeatmodeler/D5_db.nhr",
     container:
         repeatmodeler
     threads: 1
@@ -172,16 +175,16 @@ rule repeatmodeler_build_db:
         mem_mb=32000,
         runtime=60,
     params:
-        db="results/repeatmodeler/JN3_db",
+        db="results/repeatmodeler/D5_db",
     shell:
         "BuildDatabase -name {params.db} -engine ncbi {input}"
 
 
 rule repeatmodeler_run:
     input:
-        "results/repeatmodeler/JN3_db.nhr",
+        "results/repeatmodeler/D5_db.nhr",
     output:
-        "results/repeatmodeler/JN3-families.fa",
+        "results/repeatmodeler/D5-families.fa",
     container:
         repeatmodeler
     threads: 24
@@ -189,7 +192,7 @@ rule repeatmodeler_run:
         mem_mb=128000,
         runtime=1440,
     params:
-        db="results/repeatmodeler/JN3_db",
+        db="results/repeatmodeler/D5_db",
         outdir="results/repeatmodeler",
     shell:
         """
@@ -201,13 +204,13 @@ rule repeatmodeler_run:
         cp {params.db}.* $SCRATCH_DIR/
 
         RepeatModeler \
-            -database $SCRATCH_DIR/JN3_db \
+            -database $SCRATCH_DIR/D5_db \
             -threads {threads} \
             -LTRStruct \
             -dir $SCRATCH_DIR
 
         # copy results back to NFS
-        cp $SCRATCH_DIR/JN3_db-families.fa {output}
+        cp $SCRATCH_DIR/D5_db-families.fa {output}
         cp $SCRATCH_DIR/consensi.fa {params.outdir}/ 2>/dev/null || true
         cp $SCRATCH_DIR/families.stk {params.outdir}/ 2>/dev/null || true
         """
@@ -216,16 +219,16 @@ rule repeatmodeler_run:
 rule repeatmasker_align:
     """
     Run RepeatMasker alignments only (-nopost skips post-processing).
-    Output is JN3.fasta.cat.gz — the alignment archive.
+    Output is D5.fasta.cat.gz — the alignment archive.
     Runs on local scratch to avoid NFS I/O bottleneck.
     """
     input:
         genome=GENOME,
-        lib="results/repeatmodeler/JN3-families.fa",
+        lib="results/repeatmodeler/D5-families.fa",
     output:
-        cat="results/repeatmasker/JN3.fasta.cat.gz",
-        out="results/repeatmasker/JN3.fasta.out",
-        gff="results/repeatmasker/JN3.fasta.out.gff",
+        cat="results/repeatmasker/D5.fasta.cat.gz",
+        out="results/repeatmasker/D5.fasta.out",
+        gff="results/repeatmasker/D5.fasta.out.gff",
     container:
         repeatmodeler
     threads: 24
@@ -234,6 +237,8 @@ rule repeatmasker_align:
         runtime=480,
     params:
         outdir="results/repeatmasker",
+        # actual filename RepeatMasker writes, derived from the input fasta
+        rm_base=GENOME_BASENAME,
     shell:
         """
         SCRATCH_DIR=/scratch/temp/$SLURM_JOB_ID/repeatmasker
@@ -246,9 +251,9 @@ rule repeatmasker_align:
             -dir $SCRATCH_DIR \
             {input.genome}
 
-        mv $SCRATCH_DIR/JN3.fasta.cat.gz {output.cat}
-        mv $SCRATCH_DIR/JN3.fasta.out {output.out}
-        mv $SCRATCH_DIR/JN3.fasta.out.gff {output.gff}
+        mv $SCRATCH_DIR/{params.rm_base}.cat.gz {output.cat}
+        mv $SCRATCH_DIR/{params.rm_base}.out {output.out}
+        mv $SCRATCH_DIR/{params.rm_base}.out.gff {output.gff}
         """
 
 
@@ -258,7 +263,7 @@ rule repeatmasker_postprocess:
     """
     input:
         genome=GENOME,
-        out="results/repeatmasker/JN3.fasta.out",
+        out="results/repeatmasker/D5.fasta.out",
     output:
         masked=GENOME_SM,
     container:
@@ -292,8 +297,8 @@ rule make_te_gtf:
     TEtranscripts requires: gene_id, transcript_id, family_id, class_id
     """
     input:
-        gff="results/repeatmasker/JN3.fasta.out.gff",
-        out="results/repeatmasker/JN3.fasta.out",
+        gff="results/repeatmasker/D5.fasta.out.gff",
+        out="results/repeatmasker/D5.fasta.out",
     output:
         gff=TE_GFF,
         gtf=TE_GTF,
@@ -409,8 +414,8 @@ rule star_align_mrna:
     TEtranscripts EM uses these to redistribute counts probabilistically.
     """
     input:
-        r1="data/fastp/{sample}_R1.fastq.gz",
-        r2="data/fastp/{sample}_R2.fastq.gz",
+        r1="results/fastp/{sample}_R1.fastq.gz",
+        r2="results/fastp/{sample}_R2.fastq.gz",
         index="data/star_index",
     output:
         bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",

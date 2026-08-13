@@ -7,7 +7,7 @@ multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 
 # TODO: confirm this points at the NEW genome assembly / annotation-derived
 # transcriptome fasta, not a placeholder left over from the JN3 build.
-TRANSCRIPTOME = "data/reference/Lmac_D5_transcripts_fasta"
+TRANSCRIPTOME = "data/genomes/Lmac_D5_transcripts.fasta"
 
 SAMPLES = [
     # ── New samples — batch1 (control: D5-5) ────────────────────────────────
@@ -27,9 +27,6 @@ SAMPLES = [
     "A1-2-1",
     "A1-2-2",
     "A1-2-3",
-    "A1-3-1",
-    "A1-3-2",
-    "A1-3-3",
     "A3-1",
     "A3-2",
     "A3-3",
@@ -40,9 +37,9 @@ SAMPLES = [
     "D5-6-2",
     "D5-6-3",
     # ── New samples — batch3 (control: D5-7) ────────────────────────────────
-    "R1-1-1",
-    "R1-1-2",
-    "R1-1-3",
+    "R1-1",
+    "R1-2",
+    "R1-3",
     "R2-2-1",
     "R2-2-2",
     "R2-2-3",
