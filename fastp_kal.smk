@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 
-fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
-kallisto = "docker://quay.io/biocontainers/kallisto:0.51.1--h2b92561_2"
-multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
+fastp = "/QRISdata/Q9141/lmac_rna/sifs/fastp.sif" #"docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
+kallisto = "/QRISdata/Q9141/lmac_rna/sifs/kallisto.sif" #"docker://quay.io/biocontainers/kallisto:0.51.1--h2b92561_2"
+multiqc = "/QRISdata/Q9141/lmac_rna/sifs/multiqc.sif" #"docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 
-# TODO: confirm this points at the NEW genome assembly / annotation-derived
-# transcriptome fasta, not a placeholder left over from the JN3 build.
 TRANSCRIPTOME = "data/genomes/Lmac_D5_transcripts.fasta"
 
 SAMPLES = [
