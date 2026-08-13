@@ -73,5 +73,6 @@ snakemake -s mrna_te.smk \
     --singularity-args "--bind $QRIS_PROJECT --bind $WORKDIR --bind $TMPDIR"
 
 # ── Once-off copy of final results back to QRIS for long-term storage ───────
-rsync -av --exclude 'tmp/' results/ "$QRIS_PROJECT/results/"
-rsync -av lepto_batch*_gene_TE_analysis.txt "$QRIS_PROJECT/"
+# fastp/ excluded: it's a symlink back to QRIS itself, nothing new to copy.
+rsync -av --exclude 'tmp/' --exclude 'fastp/' results/ "$QRIS_PROJECT/results/"
+rsync -av lepto_batch*_gene_TE_analysis.txt "$QRIS_PROJECT/" 2>/dev/null || echo "No lepto_batch*.txt files yet - run may not have completed the TEtranscripts steps"
