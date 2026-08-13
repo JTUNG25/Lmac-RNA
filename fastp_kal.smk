@@ -222,8 +222,8 @@ rule multiqc:
     shell:
         """
         mkdir -p {params.outdir}
-        mkdir -p /QRISdata/Q9141/lmac_rna/tmp
-        TMPDIR=/QRISdata/Q9141/lmac_rna/tmp \
+        mkdir -p tmp
+        TMPDIR=$(pwd)/tmp \
             multiqc \
             {params.search_dirs} \
             --outdir {params.outdir} \
