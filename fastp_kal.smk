@@ -5,10 +5,79 @@ fastp = "docker://quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 kallisto = "docker://quay.io/biocontainers/kallisto:0.51.1--h2b92561_2"
 multiqc = "docker://quay.io/biocontainers/multiqc:1.33--pyhdfd78af_0"
 
-
-TRANSCRIPTOME = "data/reference/JN3_transcript_clean.fa"
+# TODO: confirm this points at the NEW genome assembly / annotation-derived
+# transcriptome fasta, not a placeholder left over from the JN3 build.
+TRANSCRIPTOME = "data/reference/Lmac_D5_transcripts_fasta"
 
 SAMPLES = [
+    # ── New samples — batch1 (control: D5-5) ────────────────────────────────
+    "D2-2-1",
+    "D2-2-2",
+    "D2-2-3",
+    "D2-3-1",
+    "D2-3-2",
+    "D2-3-3",
+    "D5-5-1",
+    "D5-5-2",
+    "D5-5-3",
+    # ── New samples — batch2 (control: D5-6) ────────────────────────────────
+    "A1-1-1",
+    "A1-1-2",
+    "A1-1-3",
+    "A1-2-1",
+    "A1-2-2",
+    "A1-2-3",
+    "A1-3-1",
+    "A1-3-2",
+    "A1-3-3",
+    "A3-1",
+    "A3-2",
+    "A3-3",
+    "D1-1",
+    "D1-2",
+    "D1-3",
+    "D5-6-1",
+    "D5-6-2",
+    "D5-6-3",
+    # ── New samples — batch3 (control: D5-7) ────────────────────────────────
+    "R1-1-1",
+    "R1-1-2",
+    "R1-1-3",
+    "R2-2-1",
+    "R2-2-2",
+    "R2-2-3",
+    "R2-3-1",
+    "R2-3-2",
+    "R2-3-3",
+    "R2-4-1",
+    "R2-4-2",
+    "R2-4-3",
+    "R2-5-1",
+    "R2-5-2",
+    "R2-5-3",
+    "D5-7-1",
+    "D5-7-2",
+    "D5-7-3",
+    # ── New samples — batch4 (control: WT-1) ────────────────────────────────
+    "A13-1-1",
+    "A13-1-2",
+    "A13-1-3",
+    "A13-2-1",
+    "A13-2-2",
+    "A13-2-3",
+    "R12-1-1",
+    "R12-1-2",
+    "R12-1-3",
+    "R12-2-1",
+    "R12-2-2",
+    "R12-2-3",
+    "R12-3-1",
+    "R12-3-2",
+    "R12-3-3",
+    "WT-1-1",
+    "WT-1-2",
+    "WT-1-3",
+    # (batch5)
     "A2-1-1",
     "A2-1-2",
     "A2-1-3",
@@ -30,7 +99,6 @@ SAMPLES = [
     "R1-2-1",
     "R1-2-2",
     "R1-2-3",
-    # new Batch WT
     "WT-2-1",
     "WT-2-2",
     "WT-2-3",
@@ -64,7 +132,7 @@ rule kallisto_index:
         kallisto index \
             -i {output} \
             {input} \
-            2> {log}
+            2>{log}
         """
 
 
@@ -98,7 +166,7 @@ rule fastp:
             --length_required 35 \
             --qualified_quality_phred 20 \
             --unqualified_percent_limit 20 \
-            2> {log}
+            2>{log}
         """
 
 
@@ -133,7 +201,7 @@ rule kallisto_quant:
             -b {params.bootstrap} \
             --threads {threads} \
             {input.r1} {input.r2} \
-            2> {log}
+            2>{log}
         """
 
 
@@ -159,9 +227,9 @@ rule multiqc:
         mkdir -p {params.outdir}
         mkdir -p /QRISdata/Q9141/lmac_rna/tmp
         TMPDIR=/QRISdata/Q9141/lmac_rna/tmp \
-        multiqc \
+            multiqc \
             {params.search_dirs} \
             --outdir {params.outdir} \
             --force \
-            2> {log}
+            2>{log}
         """
